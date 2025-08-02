@@ -4,31 +4,25 @@ import Image from "next/image";
 import { Carousel } from "@/components/ui/carousel";
 import Link from "next/link";
 import { useAuth } from "@/contexts/Authcontext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { getAllCharacters } from "@/lib/characters";
+import RecentModal from "@/components/modal/RecentModal";
+
+const characters = getAllCharacters();
 
 const characterData = [
-  {
-    id: "rosie",
-    title: "Rosie",
-    button: "Meet Rosie",
-    src: "/preview/1.png",
-  },
-  {
-    id: "sia",
-    title: "Sia",
-    button: "Meet Sia",
-    src: "/preview/2.png",
-  },
-  {
-    id: "jessica",
-    title: "Jessica",
-    button: "Meet Jessica",
-    src: "/preview/3.png",
-  },
+  ...characters.map((char) => ({
+    id: char.id,
+    title: char.name,
+    description: char.description,
+    button: `Meet ${char.name}`,
+    src: char.previewImage,
+  })),
   {
     id: "create",
     title: "+",
+    description: "",
     button: "Create New Avatar",
     src: "create",
   },
@@ -37,6 +31,8 @@ const characterData = [
 export default function Dream() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
+
+  const [isRecentModalOpen, setIsRecentModalOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -66,7 +62,10 @@ export default function Dream() {
             <button className="text-white/80 hover:text-white transition-colors duration-200 text-sm font-medium">
               Upgrade
             </button>
-            <button className="text-white/80 hover:text-white transition-colors duration-200 text-sm font-medium">
+            <button
+              onClick={() => setIsRecentModalOpen(true)}
+              className="text-white/80 hover:text-white transition-colors duration-200 text-sm font-medium"
+            >
               Recent
             </button>
             <Link
@@ -110,8 +109,15 @@ export default function Dream() {
       {/* Main Content */}
       <main className="flex items-center justify-center min-h-screen overflow-hidden pt-20">
         {/* Character Carousel */}
-        <Carousel slides={characterData} />
+        <Carousel slides={characterData} userId={user?.id || ""} />
       </main>
+
+      {/* Recent Modal */}
+      <RecentModal
+        isOpen={isRecentModalOpen}
+        onClose={() => setIsRecentModalOpen(false)}
+        userId={user?.id || ""}
+      />
     </div>
   );
 }

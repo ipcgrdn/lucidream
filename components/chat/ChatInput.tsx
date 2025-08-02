@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+
 interface ChatInputProps {
   inputValue: string;
   setInputValue: (value: string) => void;
@@ -13,6 +15,8 @@ export default function ChatInput({
   onSendMessage,
   isLoading,
 }: ChatInputProps) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -20,27 +24,40 @@ export default function ChatInput({
     }
   };
 
+  const adjustHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "40px";
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 80)}px`;
+    }
+  };
+
+  useEffect(() => {
+    adjustHeight();
+  }, [inputValue]);
+
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 items-end">
       <textarea
+        ref={textareaRef}
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyPress}
-        placeholder="메시지를 입력하세요..."
-        className="flex-1 bg-white/10 border border-white/20 rounded-2xl px-4 py-3 text-white placeholder-white/50 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/50 min-h-[50px] max-h-[100px]"
-        rows={1}
+        placeholder="Ask something..."
+        className="flex w-full bg-white/10 border border-white/20 rounded-4xl px-3 py-2 text-sm text-white placeholder-white/50 resize-none focus:outline-none overflow-hidden items-center"
+        style={{ height: "40px", maxHeight: "80px" }}
         disabled={isLoading}
       />
       <button
         onClick={onSendMessage}
         disabled={!inputValue.trim() || isLoading}
-        className="bg-blue-500/80 hover:bg-blue-500 disabled:bg-white/10 disabled:text-white/30 text-white p-3 rounded-2xl transition-colors duration-200 flex items-center justify-center min-w-[50px]"
+        className="bg-white/10 hover:bg-white/20 disabled:bg-white/10 disabled:text-white/30 text-white p-2 rounded-4xl transition-colors duration-200 flex items-center justify-center w-[40px] h-[40px] flex-shrink-0"
       >
         {isLoading ? (
-          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
         ) : (
           <svg
-            className="w-5 h-5 rotate-90"
+            className="w-4 h-4 rotate-90"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

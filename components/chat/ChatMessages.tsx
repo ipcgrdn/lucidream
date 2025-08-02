@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
+import { LoaderTwo } from "../ui/loader";
 
 interface Message {
   role: "user" | "assistant";
@@ -10,9 +11,14 @@ interface Message {
 interface ChatMessagesProps {
   messages: Message[];
   isLoading: boolean;
+  messagesLoading?: boolean;
 }
 
-export default function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
+export default function ChatMessages({
+  messages,
+  isLoading,
+  messagesLoading = false,
+}: ChatMessagesProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -23,12 +29,20 @@ export default function ChatMessages({ messages, isLoading }: ChatMessagesProps)
     scrollToBottom();
   }, [messages]);
 
+  if (messagesLoading) {
+    return (
+      <div className="flex-1 overflow-y-auto mb-4 space-y-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+        <div className="flex justify-center items-center h-full">
+          <LoaderTwo />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 overflow-y-auto mb-4 space-y-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
       {messages.length === 0 ? (
-        <div className="text-black text-left py-4">
-          안녕하세요! 무엇을 도와드릴까요?
-        </div>
+        <div />
       ) : (
         messages.map((message, index) => (
           <div
@@ -38,10 +52,10 @@ export default function ChatMessages({ messages, isLoading }: ChatMessagesProps)
             }`}
           >
             <div
-              className={`max-w-[80%] p-3 rounded-2xl ${
+              className={`max-w-[80%] p-3 rounded-4xl ${
                 message.role === "user"
-                  ? "bg-blue-500/80 text-white ml-4"
-                  : "bg-transparent text-black mr-4"
+                  ? "bg-black/10 text-white ml-2"
+                  : "bg-white/10 text-black mr-2"
               }`}
             >
               <p className="text-sm leading-relaxed whitespace-pre-wrap">
@@ -53,7 +67,7 @@ export default function ChatMessages({ messages, isLoading }: ChatMessagesProps)
       )}
       {isLoading && (
         <div className="flex justify-start">
-          <div className="bg-white/10 text-black/90 max-w-[80%] p-3 rounded-2xl mr-4">
+          <div className="max-w-[80%] p-3 rounded-4xl mr-2">
             <div className="flex space-x-1">
               <div className="w-2 h-2 bg-black/60 rounded-full animate-bounce"></div>
               <div

@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ChatMessages from "./ChatMessages";
 import ChatInput from "./ChatInput";
+
+import { getChatsByDreamId, saveChatMessage } from "@/lib/dream_chats";
 
 interface Message {
   role: "user" | "assistant";
@@ -11,23 +13,53 @@ interface Message {
 
 interface RightCardProps {
   isOpen: boolean;
+  dreamId: string;
 }
 
-export default function RightCard({ isOpen }: RightCardProps) {
+export default function RightCard({ isOpen, dreamId }: RightCardProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [messagesLoading, setMessagesLoading] = useState(true);
+
+  // 기존 채팅 메시지 로드
+  useEffect(() => {
+    const loadMessages = async () => {
+      if (!dreamId) return;
+
+      setMessagesLoading(true);
+      try {
+        const chats = await getChatsByDreamId(dreamId);
+        const convertedMessages: Message[] = chats.map((chat) => ({
+          role: chat.type === "user" ? "user" : "assistant",
+          content: chat.message,
+        }));
+        setMessages(convertedMessages);
+      } catch (error) {
+        console.error("메시지 로딩 에러:", error);
+      } finally {
+        setMessagesLoading(false);
+      }
+    };
+
+    loadMessages();
+  }, [dreamId]);
 
   const sendMessage = async () => {
-    if (!inputValue.trim() || isLoading) return;
+    if (!inputValue.trim() || isLoading || !dreamId) return;
 
-    const userMessage: Message = { role: "user", content: inputValue };
+    const userMessageContent = inputValue;
+    const userMessage: Message = { role: "user", content: userMessageContent };
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInputValue("");
     setIsLoading(true);
 
     try {
+      // 사용자 메시지를 데이터베이스에 저장
+      await saveChatMessage(dreamId, userMessageContent, "user");
+
+      // OpenAI API 호출
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
@@ -46,10 +78,15 @@ export default function RightCard({ isOpen }: RightCardProps) {
       }
 
       const data = await response.json();
+      const assistantMessageContent = data.message;
       const assistantMessage: Message = {
         role: "assistant",
-        content: data.message,
+        content: assistantMessageContent,
       };
+
+      // 어시스턴트 메시지를 데이터베이스에 저장
+      await saveChatMessage(dreamId, assistantMessageContent, "character");
+
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error("Error sending message:", error);
@@ -76,7 +113,11 @@ export default function RightCard({ isOpen }: RightCardProps) {
     `}
     >
       <div className="relative h-full p-6 flex flex-col">
-        <ChatMessages messages={messages} isLoading={isLoading} />
+        <ChatMessages
+          messages={messages}
+          isLoading={isLoading}
+          messagesLoading={messagesLoading}
+        />
 
         <ChatInput
           inputValue={inputValue}

@@ -2,33 +2,47 @@
 
 import { useState, useRef, useId, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { findOrCreateDream } from "@/lib/dreams";
 
 interface SlideData {
   id: string;
   title: string;
+  description: string;
   button: string;
   src: string;
 }
 
 interface ChatButtonProps {
   slide: SlideData;
+  userId: string;
 }
 
-const ChatButton = ({ slide }: ChatButtonProps) => {
+const ChatButton = ({ slide, userId }: ChatButtonProps) => {
   const router = useRouter();
 
-  const handleClick = () => {
+  const handleClick = async () => {
     if (slide.id === "create") {
-      // 새 아바타 생성 로직 (나중에 구현)
-      console.log("Create new avatar");
+      alert("Coming soon!");
     } else {
-      router.push(`/dream/${slide.id}`);
+      if (!userId) {
+        console.error("사용자 ID가 없습니다");
+        return;
+      }
+
+      // 기존 dream 확인 또는 새로 생성
+      const dream = await findOrCreateDream(userId, slide.id);
+
+      if (dream) {
+        router.push(`/dream/${dream.id}`);
+      } else {
+        console.error("Dream 생성/조회에 실패했습니다");
+      }
     }
   };
 
   return (
     <button
-      className="mt-6 px-4 py-2 w-fit mx-auto sm:text-sm text-black bg-white h-12 border border-transparent text-xs flex justify-center items-center rounded-2xl hover:shadow-lg transition duration-200 shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)] hover:opacity-90"
+      className="mt-4 px-4 py-2 w-fit mx-auto sm:text-sm text-black bg-white h-12 border border-transparent text-xs flex justify-center items-center rounded-2xl hover:shadow-lg transition duration-200 shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)] hover:opacity-90"
       onClick={handleClick}
     >
       {slide.button}
@@ -41,9 +55,16 @@ interface SlideProps {
   index: number;
   current: number;
   handleSlideClick: (index: number) => void;
+  userId: string;
 }
 
-const Slide = ({ slide, index, current, handleSlideClick }: SlideProps) => {
+const Slide = ({
+  slide,
+  index,
+  current,
+  handleSlideClick,
+  userId,
+}: SlideProps) => {
   const slideRef = useRef<HTMLLIElement>(null);
 
   const xRef = useRef(0);
@@ -90,7 +111,7 @@ const Slide = ({ slide, index, current, handleSlideClick }: SlideProps) => {
     event.currentTarget.style.opacity = "1";
   };
 
-  const { src, title } = slide;
+  const { src, title, description } = slide;
 
   return (
     <div className="[perspective:1200px] [transform-style:preserve-3d]">
@@ -146,8 +167,9 @@ const Slide = ({ slide, index, current, handleSlideClick }: SlideProps) => {
           <h2 className="text-lg md:text-2xl lg:text-4xl font-semibold  relative">
             {title}
           </h2>
+          <p className="text-md mt-2">{description}</p>
           <div className="flex justify-center">
-            <ChatButton slide={slide} />
+            <ChatButton slide={slide} userId={userId} />
           </div>
         </article>
       </li>
@@ -194,9 +216,10 @@ const CarouselControl = ({
 
 interface CarouselProps {
   slides: SlideData[];
+  userId: string;
 }
 
-export function Carousel({ slides }: CarouselProps) {
+export function Carousel({ slides, userId }: CarouselProps) {
   const [current, setCurrent] = useState(0);
 
   const handlePreviousClick = () => {
@@ -235,6 +258,7 @@ export function Carousel({ slides }: CarouselProps) {
             index={index}
             current={current}
             handleSlideClick={handleSlideClick}
+            userId={userId}
           />
         ))}
       </ul>
