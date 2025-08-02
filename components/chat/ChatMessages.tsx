@@ -12,14 +12,21 @@ interface ChatMessagesProps {
   messages: Message[];
   isLoading: boolean;
   messagesLoading?: boolean;
+  hasMoreMessages?: boolean;
+  loadingMoreMessages?: boolean;
+  onLoadMore?: () => void;
 }
 
 export default function ChatMessages({
   messages,
   isLoading,
   messagesLoading = false,
+  hasMoreMessages = false,
+  loadingMoreMessages = false,
+  onLoadMore,
 }: ChatMessagesProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
@@ -28,6 +35,32 @@ export default function ChatMessages({
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // 스크롤 감지하여 더 많은 메시지 로드
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container || !onLoadMore) return;
+
+    const handleScroll = () => {
+      if (
+        container.scrollTop === 0 &&
+        hasMoreMessages &&
+        !loadingMoreMessages
+      ) {
+        const scrollHeight = container.scrollHeight;
+        onLoadMore();
+        // 로드 후 스크롤 위치 유지
+        setTimeout(() => {
+          if (container.scrollHeight > scrollHeight) {
+            container.scrollTop = container.scrollHeight - scrollHeight;
+          }
+        }, 100);
+      }
+    };
+
+    container.addEventListener("scroll", handleScroll);
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, [hasMoreMessages, loadingMoreMessages, onLoadMore]);
 
   if (messagesLoading) {
     return (
@@ -40,7 +73,20 @@ export default function ChatMessages({
   }
 
   return (
-    <div className="flex-1 overflow-y-auto mb-4 space-y-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+    <div
+      ref={messagesContainerRef}
+      className="flex-1 overflow-y-auto mb-4 space-y-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent"
+    >
+      {/* 로딩 표시만 */}
+      {loadingMoreMessages && (
+        <div className="flex justify-center py-2">
+          <div className="flex items-center space-x-2 text-white/60">
+            <div className="w-4 h-4 border-2 border-white/20 border-t-white/60 rounded-full animate-spin"></div>
+            <span className="text-sm">Loading...</span>
+          </div>
+        </div>
+      )}
+
       {messages.length === 0 ? (
         <div />
       ) : (

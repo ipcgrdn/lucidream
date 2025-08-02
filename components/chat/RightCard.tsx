@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import ChatMessages from "./ChatMessages";
 import ChatInput from "./ChatInput";
 
-import { getChatsByDreamId, saveChatMessage } from "@/lib/dream_chats";
+import { getChatsByDreamIdPaginated, saveChatMessage } from "@/lib/dream_chats";
+import { Character } from "@/lib/characters";
 
 interface Message {
   role: "user" | "assistant";
@@ -14,27 +15,39 @@ interface Message {
 interface RightCardProps {
   isOpen: boolean;
   dreamId: string;
+  character: Character;
 }
 
-export default function RightCard({ isOpen, dreamId }: RightCardProps) {
+export default function RightCard({
+  isOpen,
+  dreamId,
+  character,
+}: RightCardProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [messagesLoading, setMessagesLoading] = useState(true);
+  const [hasMoreMessages, setHasMoreMessages] = useState(false);
+  const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
 
-  // 기존 채팅 메시지 로드
+  // 최초 채팅 메시지 로드 (최근 20개)
   useEffect(() => {
-    const loadMessages = async () => {
+    const loadInitialMessages = async () => {
       if (!dreamId) return;
 
       setMessagesLoading(true);
       try {
-        const chats = await getChatsByDreamId(dreamId);
+        const { chats, hasMore } = await getChatsByDreamIdPaginated(
+          dreamId,
+          20,
+          0
+        );
         const convertedMessages: Message[] = chats.map((chat) => ({
           role: chat.type === "user" ? "user" : "assistant",
           content: chat.message,
         }));
         setMessages(convertedMessages);
+        setHasMoreMessages(hasMore);
       } catch (error) {
         console.error("메시지 로딩 에러:", error);
       } finally {
@@ -42,8 +55,34 @@ export default function RightCard({ isOpen, dreamId }: RightCardProps) {
       }
     };
 
-    loadMessages();
+    loadInitialMessages();
   }, [dreamId]);
+
+  // 더 많은 메시지 로드
+  const loadMoreMessages = async () => {
+    if (loadingMoreMessages || !hasMoreMessages || !dreamId) return;
+
+    setLoadingMoreMessages(true);
+    try {
+      const { chats, hasMore } = await getChatsByDreamIdPaginated(
+        dreamId,
+        20,
+        messages.length
+      );
+      const convertedMessages: Message[] = chats.map((chat) => ({
+        role: chat.type === "user" ? "user" : "assistant",
+        content: chat.message,
+      }));
+
+      // 기존 메시지 앞에 추가
+      setMessages((prev) => [...convertedMessages, ...prev]);
+      setHasMoreMessages(hasMore);
+    } catch (error) {
+      console.error("추가 메시지 로딩 에러:", error);
+    } finally {
+      setLoadingMoreMessages(false);
+    }
+  };
 
   const sendMessage = async () => {
     if (!inputValue.trim() || isLoading || !dreamId) return;
@@ -59,17 +98,19 @@ export default function RightCard({ isOpen, dreamId }: RightCardProps) {
       // 사용자 메시지를 데이터베이스에 저장
       await saveChatMessage(dreamId, userMessageContent, "user");
 
-      // OpenAI API 호출
+      // OpenAI API 호출 - 최근 10개 메시지만 전송
+      const recentMessages = newMessages.slice(-10);
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          messages: newMessages.map((msg) => ({
+          messages: recentMessages.map((msg) => ({
             role: msg.role,
             content: msg.content,
           })),
+          characterId: character.id,
         }),
       });
 
@@ -77,17 +118,61 @@ export default function RightCard({ isOpen, dreamId }: RightCardProps) {
         throw new Error("Failed to send message");
       }
 
-      const data = await response.json();
-      const assistantMessageContent = data.message;
+      // 스트리밍 응답 처리
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let assistantMessageContent = "";
+
+      // 어시스턴트 메시지를 미리 추가하고 스트리밍으로 업데이트
       const assistantMessage: Message = {
         role: "assistant",
-        content: assistantMessageContent,
+        content: "",
       };
-
-      // 어시스턴트 메시지를 데이터베이스에 저장
-      await saveChatMessage(dreamId, assistantMessageContent, "character");
-
       setMessages((prev) => [...prev, assistantMessage]);
+
+      if (reader) {
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value);
+            const lines = chunk.split("\n");
+
+            for (const line of lines) {
+              if (line.startsWith("data: ")) {
+                try {
+                  const data = JSON.parse(line.slice(6));
+                  if (data.content) {
+                    assistantMessageContent += data.content;
+                    // 실시간으로 메시지 업데이트
+                    setMessages((prev) => {
+                      const updatedMessages = [...prev];
+                      updatedMessages[updatedMessages.length - 1] = {
+                        role: "assistant",
+                        content: assistantMessageContent,
+                      };
+                      return updatedMessages;
+                    });
+                  } else if (data.done) {
+                    // 스트리밍 완료 후 데이터베이스에 저장
+                    await saveChatMessage(
+                      dreamId,
+                      assistantMessageContent,
+                      "character"
+                    );
+                    break;
+                  }
+                } catch (parseError) {
+                  console.error("JSON parse error:", parseError);
+                }
+              }
+            }
+          }
+        } finally {
+          reader.releaseLock();
+        }
+      }
     } catch (error) {
       console.error("Error sending message:", error);
       const errorMessage: Message = {
@@ -117,6 +202,9 @@ export default function RightCard({ isOpen, dreamId }: RightCardProps) {
           messages={messages}
           isLoading={isLoading}
           messagesLoading={messagesLoading}
+          hasMoreMessages={hasMoreMessages}
+          loadingMoreMessages={loadingMoreMessages}
+          onLoadMore={loadMoreMessages}
         />
 
         <ChatInput

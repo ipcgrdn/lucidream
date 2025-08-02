@@ -9,23 +9,35 @@ export interface DreamChat {
   metadata?: {};
 }
 
-export async function getChatsByDreamId(dreamId: string): Promise<DreamChat[]> {
+export async function getChatsByDreamIdPaginated(
+  dreamId: string,
+  limit: number = 20,
+  offset: number = 0
+): Promise<{ chats: DreamChat[]; hasMore: boolean }> {
   try {
+    // limit + 1을 가져와서 hasMore 판단
     const { data: chats, error } = await supabase
       .from("dream_chats")
       .select("*")
       .eq("dream_id", dreamId)
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: false }) // 최신 순으로 정렬
+      .range(offset, offset + limit);
 
     if (error) {
       console.error("채팅 조회 에러:", error);
-      return [];
+      return { chats: [], hasMore: false };
     }
 
-    return chats || [];
+    const hasMore = (chats?.length || 0) > limit;
+    const resultChats = hasMore ? chats?.slice(0, limit) || [] : chats || [];
+
+    return {
+      chats: resultChats.reverse(), // 시간 순으로 다시 정렬
+      hasMore,
+    };
   } catch (error) {
-    console.error("getChatsByDreamId 에러:", error);
-    return [];
+    console.error("getChatsByDreamIdPaginated 에러:", error);
+    return { chats: [], hasMore: false };
   }
 }
 

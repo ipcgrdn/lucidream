@@ -96,7 +96,11 @@ export default function DreamChatPage() {
       <ChatBackground character={character} />
 
       <LeftCard isOpen={isLeftCardOpen} />
-      <RightCard isOpen={isRightCardOpen} dreamId={dreamId} />
+      <RightCard
+        isOpen={isRightCardOpen}
+        dreamId={dreamId}
+        character={character}
+      />
     </div>
   );
 }
