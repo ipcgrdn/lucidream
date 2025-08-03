@@ -4,6 +4,7 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { Suspense } from "react";
 import VRMModel from "./VRMModel";
+import { AnimationPresetType } from "@/lib/vrm-animations";
 
 interface VRMViewerProps {
   modelPath: string;
@@ -11,6 +12,8 @@ interface VRMViewerProps {
   autoRotate?: boolean;
   lightIntensity?: number;
   backgroundImage?: string;
+  animationPreset?: AnimationPresetType;
+  onAnimationChange?: (preset: AnimationPresetType) => void;
 }
 
 export default function VRMViewer({
@@ -19,13 +22,15 @@ export default function VRMViewer({
   autoRotate = false,
   lightIntensity = 1,
   backgroundImage,
+  animationPreset = "idle",
+  onAnimationChange,
 }: VRMViewerProps) {
   return (
     <div className={`w-full h-full relative ${className}`}>
       {/* 배경 이미지 */}
       {backgroundImage && (
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 opacity-80"
           style={{
             backgroundImage: `url(${backgroundImage})`,
             backgroundSize: "cover",
@@ -60,7 +65,11 @@ export default function VRMViewer({
           />
 
           {/* VRM 모델 */}
-          <VRMModel url={modelPath} />
+          <VRMModel
+            url={modelPath}
+            animationPreset={animationPreset}
+            onAnimationChange={onAnimationChange}
+          />
 
           {/* 환경 및 컨트롤 */}
           <OrbitControls

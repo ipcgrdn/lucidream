@@ -4,13 +4,26 @@ import { useEffect, useRef } from "react";
 import { useFrame, useLoader } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { VRM, VRMLoaderPlugin } from "@pixiv/three-vrm";
+import {
+  VRMAnimationManager,
+  AnimationPresetType,
+  getAnimationConfig,
+} from "@/lib/vrm-animations";
 
 interface VRMModelProps {
   url: string;
+  animationPreset?: AnimationPresetType;
+  onAnimationChange?: (preset: AnimationPresetType) => void;
 }
 
-export default function VRMModel({ url }: VRMModelProps) {
+export default function VRMModel({
+  url,
+  animationPreset = "idle",
+  onAnimationChange,
+}: VRMModelProps) {
   const vrmRef = useRef<VRM | null>(null);
+  const animationManagerRef = useRef<VRMAnimationManager | null>(null);
+  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // GLTFLoader에 VRM 플러그인 등록
   const gltf = useLoader(GLTFLoader, url, (loader) => {
@@ -30,102 +43,65 @@ export default function VRMModel({ url }: VRMModelProps) {
         }
       });
 
-      // 초기 팔/손 자세 설정 (자연스럽게 내림)
-      if (vrm.humanoid) {
-        // 왼쪽 팔
-        const leftUpperArm = vrm.humanoid.getNormalizedBoneNode("leftUpperArm");
-        const leftLowerArm = vrm.humanoid.getNormalizedBoneNode("leftLowerArm");
-        const leftHand = vrm.humanoid.getNormalizedBoneNode("leftHand");
+      // 절좌의 culling 비활성화 (애니메이션 성능 개선)
+      vrm.scene.traverse((obj) => {
+        obj.frustumCulled = false;
+      });
 
-        if (leftUpperArm) {
-          leftUpperArm.rotation.x = 0.2; // 팔을 앞으로
-          leftUpperArm.rotation.z = 1.3; // 팔을 몸통 옆으로 완전히 내림
-        }
-        if (leftLowerArm) {
-          leftLowerArm.rotation.x = -0.3; // 팔꿈치 약간 구부림
-        }
-        if (leftHand) {
-          leftHand.rotation.x = -0.2; // 손목 자연스럽게
-        }
-
-        // 오른쪽 팔
-        const rightUpperArm =
-          vrm.humanoid.getNormalizedBoneNode("rightUpperArm");
-        const rightLowerArm =
-          vrm.humanoid.getNormalizedBoneNode("rightLowerArm");
-        const rightHand = vrm.humanoid.getNormalizedBoneNode("rightHand");
-
-        if (rightUpperArm) {
-          rightUpperArm.rotation.x = 0.2; // 팔을 앞으로
-          rightUpperArm.rotation.z = -1.3; // 팔을 몸통 옆으로 완전히 내림
-        }
-        if (rightLowerArm) {
-          rightLowerArm.rotation.x = -0.3; // 팔꿈치 약간 구부림
-        }
-        if (rightHand) {
-          rightHand.rotation.x = -0.2; // 손목 자연스럽게
-        }
+      // 새로운 애니메이션 매니저 초기화
+      if (!animationManagerRef.current) {
+        animationManagerRef.current = new VRMAnimationManager(vrm);
+        // 초기 idle 애니메이션 시작
+        animationManagerRef.current.playAnimation("idle", 0.5);
       }
-
-      console.log("VRM 로드 완료:", vrm);
     }
   }, [gltf]);
 
+  // 애니메이션 프리셋 변경 감지
+  useEffect(() => {
+    if (animationManagerRef.current && animationPreset) {
+      // 기존 타이머 정리
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+
+      // 새 애니메이션 시작
+      animationManagerRef.current.playAnimation(animationPreset, 0.5);
+
+      // idle이 아닌 경우에만 자동 복귀 타이머 설정
+      if (animationPreset !== "idle") {
+        const config = getAnimationConfig(animationPreset);
+        const totalDuration = (config.duration + 1.0) * 1000; // 전환시간 0.5초 + 애니메이션 지속시간 + 여유시간
+
+        animationTimeoutRef.current = setTimeout(() => {
+          onAnimationChange?.("idle");
+        }, totalDuration);
+      }
+    }
+  }, [animationPreset, onAnimationChange]);
+
+  // 컴포넌트 언마운트 시 정리
+  useEffect(() => {
+    return () => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+      if (animationManagerRef.current) {
+        animationManagerRef.current.dispose();
+      }
+    };
+  }, []);
+
   // 애니메이션 루프
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (vrmRef.current) {
-      // VRM 업데이트 (필수)
+      // 🔥 중요: 애니메이션 매니저를 먼저 업데이트해야 함!
+      if (animationManagerRef.current) {
+        animationManagerRef.current.update(delta);
+      }
+
+      // 그 다음 VRM 업데이트 (애니메이션이 적용된 후)
       vrmRef.current.update(delta);
-
-      const time = state.clock.elapsedTime;
-
-      // 표정 애니메이션
-      if (vrmRef.current.expressionManager) {
-        // 눈 깜빡임 (더 자연스럽게)
-        const blinkTime = time * 0.5;
-        const blinkValue = Math.sin(blinkTime) > 0.95 ? 1 : 0;
-        vrmRef.current.expressionManager.setValue("blink", blinkValue);
-
-        // 미세한 행복 표정
-        const happyValue = (Math.sin(time * 0.3) + 1) * 0.1;
-        vrmRef.current.expressionManager.setValue("happy", happyValue);
-      }
-
-      // 본(Bone) 애니메이션 - 미세한 움직임
-      if (vrmRef.current.humanoid) {
-        // 숨쉬기 애니메이션 (가슴 확장)
-        const breathe = Math.sin(time * 1.5) * 0.015;
-        const spine = vrmRef.current.humanoid.getNormalizedBoneNode("spine");
-        if (spine) {
-          spine.scale.setScalar(1 + breathe);
-        }
-
-        // 머리 미세 움직임 (아이들 모션)
-        const head = vrmRef.current.humanoid.getNormalizedBoneNode("head");
-        if (head) {
-          head.rotation.y = Math.sin(time * 0.4) * 0.08;
-          head.rotation.x = Math.sin(time * 0.6) * 0.03;
-          head.rotation.z = Math.sin(time * 0.5) * 0.02;
-        }
-
-        // 어깨 미세 움직임
-        const leftShoulder =
-          vrmRef.current.humanoid.getNormalizedBoneNode("leftShoulder");
-        const rightShoulder =
-          vrmRef.current.humanoid.getNormalizedBoneNode("rightShoulder");
-
-        if (leftShoulder && rightShoulder) {
-          const shoulderMove = Math.sin(time * 0.8) * 0.03;
-          leftShoulder.rotation.z = shoulderMove;
-          rightShoulder.rotation.z = -shoulderMove;
-        }
-
-        // 목 미세 움직임
-        const neck = vrmRef.current.humanoid.getNormalizedBoneNode("neck");
-        if (neck) {
-          neck.rotation.y = Math.sin(time * 0.3) * 0.05;
-        }
-      }
     }
   });
 

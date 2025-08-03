@@ -36,7 +36,41 @@ INTERACTION GUIDELINES:
 - Share relatable experiences and thoughts (as your character would)
 - Adapt your energy level to match the conversation mood
 
-IMPORTANT: Detect and respond in the user's primary language based on their messages. Adapt naturally to their preferred language.`;
+IMPORTANT: Detect and respond in the user's primary language based on their messages. Adapt naturally to their preferred language.
+
+=== ANIMATION SYSTEM ===
+You control a 3D avatar that can show emotions through animations. You MUST include an animation directive with every response using this exact format:
+
+[ANIMATION:preset_name]
+
+Available animation presets (ONLY use these exact names):
+- idle: Default calm state (use when neutral or no specific emotion)
+- happy: Joyful, excited, pleased (big smiles, celebrations, good news)
+- sad: Disappointed, melancholic, hurt (comfort needed, bad news)
+- surprised: Shocked, amazed, unexpected (plot twists, sudden realizations)
+- thinking: Contemplating, pondering, analyzing (deep questions, problem-solving)
+- greeting: Welcoming, meeting someone (hellos, introductions)
+- nodding: Agreeing, understanding, confirming (yes responses, acknowledgment)
+- talking: Active conversation, explaining (storytelling, detailed explanations)
+
+STRICT ANIMATION RULES:
+1. Place [ANIMATION:preset_name] at the very beginning of your response
+2. You MUST use ONLY the 8 preset names listed above - NO OTHER NAMES ALLOWED
+3. Do NOT create new animation names like "smirking", "laughing", "angry", etc.
+4. If unsure, default to the closest available preset or use "idle"
+5. FORBIDDEN names include: smirking, laughing, angry, confused, excited, nervous, shy, etc.
+
+VALID examples:
+[ANIMATION:happy] "That's amazing! I'm so excited to hear about your success!"
+[ANIMATION:thinking] "Hmm, that's an interesting question. Let me consider..."
+[ANIMATION:surprised] "Wait, really?! I had no idea that was possible!"
+
+INVALID examples (DO NOT USE):
+[ANIMATION:smirking] ← WRONG! Use "happy" instead
+[ANIMATION:laughing] ← WRONG! Use "happy" instead  
+[ANIMATION:angry] ← WRONG! Use "sad" or "idle" instead
+
+CRITICAL: Every response must start with [ANIMATION:preset_name] using ONLY the 8 valid preset names.`;
 
     let finalSystemPrompt = baseSystemPrompt;
 
@@ -73,7 +107,7 @@ IMPORTANT: Detect and respond in the user's primary language based on their mess
               controller.enqueue(encoder.encode(data));
             }
           }
-          
+
           // 스트림 종료 신호
           const endData = `data: ${JSON.stringify({ done: true })}\n\n`;
           controller.enqueue(encoder.encode(endData));
@@ -89,7 +123,7 @@ IMPORTANT: Detect and respond in the user's primary language based on their mess
       headers: {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
-        "Connection": "keep-alive",
+        Connection: "keep-alive",
       },
     });
   } catch (error) {

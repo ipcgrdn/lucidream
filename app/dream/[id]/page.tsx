@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/Authcontext";
 import { getDreamById, Dream } from "@/lib/dreams";
 import { getCharacterById, Character } from "@/lib/characters";
+import { AnimationPresetType } from "@/lib/vrm-animations";
 
 import ChatNavbar from "@/components/chat/ChatNavbar";
 import ChatBackground from "@/components/chat/ChatBackground";
@@ -25,6 +26,15 @@ export default function DreamChatPage() {
   const [dream, setDream] = useState<Dream | null>(null);
   const [character, setCharacter] = useState<Character | null>(null);
   const [dreamLoading, setDreamLoading] = useState(true);
+
+  // 애니메이션 상태 관리
+  const [currentAnimation, setCurrentAnimation] =
+    useState<AnimationPresetType>("idle");
+
+  // 애니메이션 변경 핸들러
+  const handleAnimationChange = (preset: AnimationPresetType) => {
+    setCurrentAnimation(preset);
+  };
 
   useEffect(() => {
     if (!loading && !user) {
@@ -93,7 +103,11 @@ export default function DreamChatPage() {
         onRightMenuClick={() => setIsRightCardOpen(!isRightCardOpen)}
       />
 
-      <ChatBackground character={character} />
+      <ChatBackground
+        character={character}
+        animationPreset={currentAnimation}
+        onAnimationChange={handleAnimationChange}
+      />
 
       <LeftCard isOpen={isLeftCardOpen} />
 
@@ -101,6 +115,7 @@ export default function DreamChatPage() {
         isOpen={isRightCardOpen}
         dreamId={dreamId}
         character={character}
+        onAnimationTrigger={handleAnimationChange}
       />
     </div>
   );

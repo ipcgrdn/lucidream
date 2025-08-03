@@ -6,6 +6,8 @@ import ChatInput from "./ChatInput";
 
 import { getChatsByDreamIdPaginated, saveChatMessage } from "@/lib/dream_chats";
 import { Character } from "@/lib/characters";
+import { AnimationPresetType } from "@/lib/vrm-animations";
+import { detectAnimationInStream } from "@/lib/animation-parser";
 
 interface Message {
   role: "user" | "assistant";
@@ -16,12 +18,14 @@ interface RightCardProps {
   isOpen: boolean;
   dreamId: string;
   character: Character;
+  onAnimationTrigger?: (preset: AnimationPresetType) => void;
 }
 
 export default function RightCard({
   isOpen,
   dreamId,
   character,
+  onAnimationTrigger,
 }: RightCardProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
@@ -122,6 +126,7 @@ export default function RightCard({
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let assistantMessageContent = "";
+      let hasTriggeredAnimation = false;
 
       // 어시스턴트 메시지를 미리 추가하고 스트리밍으로 업데이트
       const assistantMessage: Message = {
@@ -145,20 +150,46 @@ export default function RightCard({
                   const data = JSON.parse(line.slice(6));
                   if (data.content) {
                     assistantMessageContent += data.content;
+
+                    // 애니메이션 감지 (한 번만 실행)
+                    if (!hasTriggeredAnimation) {
+                      const animationDetection = detectAnimationInStream(
+                        assistantMessageContent
+                      );
+                      
+                      if (
+                        animationDetection.hasAnimation &&
+                        animationDetection.animationPreset
+                      ) {
+                        onAnimationTrigger?.(
+                          animationDetection.animationPreset
+                        );
+                        hasTriggeredAnimation = true;
+                      }
+                    }
+
+                    // 애니메이션 태그를 제거한 깨끗한 텍스트로 메시지 업데이트
+                    const cleanContent = detectAnimationInStream(
+                      assistantMessageContent
+                    ).cleanedContent;
+
                     // 실시간으로 메시지 업데이트
                     setMessages((prev) => {
                       const updatedMessages = [...prev];
                       updatedMessages[updatedMessages.length - 1] = {
                         role: "assistant",
-                        content: assistantMessageContent,
+                        content: cleanContent,
                       };
                       return updatedMessages;
                     });
                   } else if (data.done) {
-                    // 스트리밍 완료 후 데이터베이스에 저장
+                    // 스트리밍 완료 후 데이터베이스에 저장 (애니메이션 태그 제거된 텍스트로)
+                    const finalCleanContent = detectAnimationInStream(
+                      assistantMessageContent
+                    ).cleanedContent;
                     await saveChatMessage(
                       dreamId,
-                      assistantMessageContent,
+                      finalCleanContent,
                       "character"
                     );
                     break;
