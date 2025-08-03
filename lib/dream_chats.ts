@@ -6,7 +6,7 @@ export interface DreamChat {
   message: string;
   type: "user" | "character";
   created_at?: string;
-  metadata?: {};
+  metadata?: "";
 }
 
 export async function getChatsByDreamIdPaginated(
@@ -45,7 +45,7 @@ export async function saveChatMessage(
   dreamId: string,
   message: string,
   type: "user" | "character",
-  metadata: {} = {}
+  metadata: string = ""
 ): Promise<DreamChat | null> {
   try {
     const { data: chat, error } = await supabase

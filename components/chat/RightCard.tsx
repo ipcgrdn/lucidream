@@ -47,7 +47,7 @@ export default function RightCard({
     );
     if (textResponseMatch) {
       // 이스케이프된 문자들을 실제 문자로 변환
-      let extractedText = textResponseMatch[1]
+      const extractedText = textResponseMatch[1]
         .replace(/\\"/g, '"')
         .replace(/\\n/g, "\n")
         .replace(/\\t/g, "\t")
@@ -61,7 +61,7 @@ export default function RightCard({
         /"textResponse"\s*:\s*"((?:[^"\\]|\\.)*)$/
       );
       if (partialMatch) {
-        let extractedText = partialMatch[1]
+        const extractedText = partialMatch[1]
           .replace(/\\"/g, '"')
           .replace(/\\n/g, "\n")
           .replace(/\\t/g, "\t")

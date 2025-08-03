@@ -49,44 +49,46 @@ export function applyExpressions(
     vrm.expressionManager.setValue("extra", expressions.extra);
   }
 
-  // 눈 관련
-  if (expressions.blink !== undefined) {
-    vrm.expressionManager.setValue("blink", expressions.blink);
+  // 눈 관련 - 깜빡임은 AI가 제어하지 않고 아이들 모션에서만 처리
+  // AI 응답에서 오는 깜빡임 값은 무시하고, 감정 표현용 눈 모양만 적용
+  // if (expressions.blink !== undefined) {
+  //   vrm.expressionManager.setValue("blink", expressions.blink);
+  // }
+  // if (expressions.blinkLeft !== undefined) {
+  //   vrm.expressionManager.setValue("blinkLeft", expressions.blinkLeft);
+  // }
+  // if (expressions.blinkRight !== undefined) {
+  //   vrm.expressionManager.setValue("blinkRight", expressions.blinkRight);
+  // }
+  // 눈동자 움직임 - 시선 추적과 중복되므로 제한적으로만 적용
+  if (expressions.lookUp !== undefined && expressions.lookUp > 0) {
+    vrm.expressionManager.setValue("lookUp", Math.min(expressions.lookUp, 0.3));
   }
-  if (expressions.blinkLeft !== undefined) {
-    vrm.expressionManager.setValue("blinkLeft", expressions.blinkLeft);
+  if (expressions.lookDown !== undefined && expressions.lookDown > 0) {
+    vrm.expressionManager.setValue("lookDown", Math.min(expressions.lookDown, 0.3));
   }
-  if (expressions.blinkRight !== undefined) {
-    vrm.expressionManager.setValue("blinkRight", expressions.blinkRight);
+  if (expressions.lookLeft !== undefined && expressions.lookLeft > 0) {
+    vrm.expressionManager.setValue("lookLeft", Math.min(expressions.lookLeft, 0.3));
   }
-  if (expressions.lookUp !== undefined) {
-    vrm.expressionManager.setValue("lookUp", expressions.lookUp);
-  }
-  if (expressions.lookDown !== undefined) {
-    vrm.expressionManager.setValue("lookDown", expressions.lookDown);
-  }
-  if (expressions.lookLeft !== undefined) {
-    vrm.expressionManager.setValue("lookLeft", expressions.lookLeft);
-  }
-  if (expressions.lookRight !== undefined) {
-    vrm.expressionManager.setValue("lookRight", expressions.lookRight);
+  if (expressions.lookRight !== undefined && expressions.lookRight > 0) {
+    vrm.expressionManager.setValue("lookRight", Math.min(expressions.lookRight, 0.3));
   }
 
-  // 입 모양 (립싱크)
-  if (expressions.aa !== undefined) {
-    vrm.expressionManager.setValue("aa", expressions.aa);
+  // 입 모양 (립싱크) - 자연스러운 대화를 위해 미묘하게 적용
+  if (expressions.aa !== undefined && expressions.aa > 0) {
+    vrm.expressionManager.setValue("aa", Math.min(expressions.aa, 0.5));
   }
-  if (expressions.ih !== undefined) {
-    vrm.expressionManager.setValue("ih", expressions.ih);
+  if (expressions.ih !== undefined && expressions.ih > 0) {
+    vrm.expressionManager.setValue("ih", Math.min(expressions.ih, 0.4));
   }
-  if (expressions.ou !== undefined) {
-    vrm.expressionManager.setValue("ou", expressions.ou);
+  if (expressions.ou !== undefined && expressions.ou > 0) {
+    vrm.expressionManager.setValue("ou", Math.min(expressions.ou, 0.6));
   }
-  if (expressions.ee !== undefined) {
-    vrm.expressionManager.setValue("ee", expressions.ee);
+  if (expressions.ee !== undefined && expressions.ee > 0) {
+    vrm.expressionManager.setValue("ee", Math.min(expressions.ee, 0.4));
   }
-  if (expressions.oh !== undefined) {
-    vrm.expressionManager.setValue("oh", expressions.oh);
+  if (expressions.oh !== undefined && expressions.oh > 0) {
+    vrm.expressionManager.setValue("oh", Math.min(expressions.oh, 0.5));
   }
 }
 
@@ -181,23 +183,33 @@ export function applyHandGestures(
   const leftHand = vrm.humanoid.getNormalizedBoneNode("leftHand");
   const rightHand = vrm.humanoid.getNormalizedBoneNode("rightHand");
 
+  // 제스처 우선순위 확인 (높은 우선순위부터)
+  const hasWave = handGestures.waveHand && handGestures.waveHand !== "none";
+  const hasPoint = handGestures.pointHand && handGestures.pointHand !== "none";
+  const hasThumbsUp = handGestures.thumbsUpHand && handGestures.thumbsUpHand !== "none";
+  const hasArmRaise = handGestures.armRaise && handGestures.armRaise !== "none";
+
+  // 우선순위가 낮은 자세부터 적용 (높은 우선순위가 덮어씀)
+  
+  // 팔 벌리기 (가장 낮은 우선순위)
+  if (!hasWave && !hasPoint && !hasThumbsUp && !hasArmRaise && 
+      handGestures.armSpread !== undefined && handGestures.armSpread > 0) {
+    const intensity = handGestures.armSpread;
+    if (leftUpperArm && rightUpperArm) {
+      leftUpperArm.rotation.z = 1.3 + intensity * 0.8; // 팔을 옆으로 벌리기
+      rightUpperArm.rotation.z = -1.3 - intensity * 0.8;
+    }
+  }
+
   // 팔짱 끼기
-  if (handGestures.crossArms !== undefined && handGestures.crossArms > 0) {
+  if (!hasWave && !hasPoint && !hasThumbsUp && !hasArmRaise && 
+      handGestures.crossArms !== undefined && handGestures.crossArms > 0) {
     const intensity = handGestures.crossArms;
     if (leftUpperArm && rightUpperArm) {
       leftUpperArm.rotation.z = 1.3 - intensity * 0.8; // 팔을 가슴 앞으로
       rightUpperArm.rotation.z = -1.3 + intensity * 0.8;
       leftUpperArm.rotation.y = intensity * 0.5;
       rightUpperArm.rotation.y = -intensity * 0.5;
-    }
-  }
-
-  // 팔 벌리기
-  if (handGestures.armSpread !== undefined && handGestures.armSpread > 0) {
-    const intensity = handGestures.armSpread;
-    if (leftUpperArm && rightUpperArm) {
-      leftUpperArm.rotation.z = 1.3 + intensity * 0.8; // 팔을 옆으로 벌리기
-      rightUpperArm.rotation.z = -1.3 - intensity * 0.8;
     }
   }
 
@@ -254,10 +266,120 @@ export function applyHandGestures(
     }
   }
 
-  // 손 흔들기, 가리키기, 엄지척, 박수, 팔 올리기는 애니메이션 시스템에서 처리
-  // waveHand, waveIntensity, waveSpeed, pointHand, pointDirection, pointIntensity
-  // thumbsUpHand, thumbsUpIntensity, clapIntensity, clapSpeed, clapRepeat, armRaise
-  // 이는 타이밍 시스템과 함께 구현될 예정
+  // 손 흔들기 구현
+  if (handGestures.waveHand && handGestures.waveHand !== "none") {
+    const intensity = handGestures.waveIntensity || 0.5;
+    
+    if (handGestures.waveHand === "right" || handGestures.waveHand === "both") {
+      if (rightUpperArm && rightHand) {
+        // 오른손 흔들기: 팔을 올리고 손목을 흔드는 자세
+        rightUpperArm.rotation.x = 0.3; // 팔을 앞으로
+        rightUpperArm.rotation.y = -0.2; // 약간 몸통 쪽으로
+        rightUpperArm.rotation.z = -1.8 + intensity * 0.5; // 팔을 올림
+        rightHand.rotation.z = Math.sin(Date.now() * 0.01) * intensity * 0.3; // 손목 흔들기
+      }
+    }
+    
+    if (handGestures.waveHand === "left" || handGestures.waveHand === "both") {
+      if (leftUpperArm && leftHand) {
+        // 왼손 흔들기
+        leftUpperArm.rotation.x = 0.3;
+        leftUpperArm.rotation.y = 0.2;
+        leftUpperArm.rotation.z = 1.8 - intensity * 0.5;
+        leftHand.rotation.z = Math.sin(Date.now() * 0.01) * intensity * 0.3;
+      }
+    }
+  }
+
+  // 가리키기 구현
+  if (handGestures.pointHand && handGestures.pointHand !== "none") {
+    const intensity = handGestures.pointIntensity || 0.7;
+    const direction = handGestures.pointDirection || "forward";
+    
+    if (handGestures.pointHand === "right") {
+      if (rightUpperArm && rightHand) {
+        switch (direction) {
+          case "forward":
+            rightUpperArm.rotation.x = -0.2;
+            rightUpperArm.rotation.y = -0.3;
+            rightUpperArm.rotation.z = -1.2;
+            break;
+          case "up":
+            rightUpperArm.rotation.x = -0.5;
+            rightUpperArm.rotation.z = -2.0;
+            break;
+          case "down":
+            rightUpperArm.rotation.x = 0.5;
+            rightUpperArm.rotation.z = -1.0;
+            break;
+        }
+        rightHand.rotation.x = -0.2 * intensity; // 손가락 펴기
+      }
+    }
+    
+    if (handGestures.pointHand === "left") {
+      if (leftUpperArm && leftHand) {
+        switch (direction) {
+          case "forward":
+            leftUpperArm.rotation.x = -0.2;
+            leftUpperArm.rotation.y = 0.3;
+            leftUpperArm.rotation.z = 1.2;
+            break;
+          case "up":
+            leftUpperArm.rotation.x = -0.5;
+            leftUpperArm.rotation.z = 2.0;
+            break;
+          case "down":
+            leftUpperArm.rotation.x = 0.5;
+            leftUpperArm.rotation.z = 1.0;
+            break;
+        }
+        leftHand.rotation.x = -0.2 * intensity;
+      }
+    }
+  }
+
+  // 엄지척 구현
+  if (handGestures.thumbsUpHand && handGestures.thumbsUpHand !== "none") {
+    const intensity = handGestures.thumbsUpIntensity || 0.6;
+    
+    if (handGestures.thumbsUpHand === "right" || handGestures.thumbsUpHand === "both") {
+      if (rightUpperArm && rightHand) {
+        rightUpperArm.rotation.x = 0.2;
+        rightUpperArm.rotation.y = -0.3;
+        rightUpperArm.rotation.z = -1.4;
+        rightHand.rotation.x = -0.3 * intensity;
+        rightHand.rotation.y = 0.2 * intensity;
+      }
+    }
+    
+    if (handGestures.thumbsUpHand === "left" || handGestures.thumbsUpHand === "both") {
+      if (leftUpperArm && leftHand) {
+        leftUpperArm.rotation.x = 0.2;
+        leftUpperArm.rotation.y = 0.3;
+        leftUpperArm.rotation.z = 1.4;
+        leftHand.rotation.x = -0.3 * intensity;
+        leftHand.rotation.y = -0.2 * intensity;
+      }
+    }
+  }
+
+  // 팔 올리기 구현
+  if (handGestures.armRaise && handGestures.armRaise !== "none") {
+    if (handGestures.armRaise === "right" || handGestures.armRaise === "both") {
+      if (rightUpperArm) {
+        rightUpperArm.rotation.x = -0.3;
+        rightUpperArm.rotation.z = -2.2; // 팔을 머리 위로
+      }
+    }
+    
+    if (handGestures.armRaise === "left" || handGestures.armRaise === "both") {
+      if (leftUpperArm) {
+        leftUpperArm.rotation.x = -0.3;
+        leftUpperArm.rotation.z = 2.2;
+      }
+    }
+  }
 }
 
 /**
