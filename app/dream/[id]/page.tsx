@@ -6,7 +6,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/Authcontext";
 import { getDreamById, Dream } from "@/lib/dreams";
 import { getCharacterById, Character } from "@/lib/characters";
-import { VRMAnimationState } from "@/vrm/vrm-animation";
 
 import ChatNavbar from "@/components/chat/ChatNavbar";
 import ChatBackground from "@/components/chat/ChatBackground";
@@ -20,15 +19,12 @@ export default function DreamChatPage() {
   const router = useRouter();
   const dreamId = params.id as string;
 
-  const [isLeftCardOpen, setIsLeftCardOpen] = useState(false);
-  const [isRightCardOpen, setIsRightCardOpen] = useState(false);
+  const [isLeftCardOpen, setIsLeftCardOpen] = useState(true);
+  const [isRightCardOpen, setIsRightCardOpen] = useState(true);
 
   const [dream, setDream] = useState<Dream | null>(null);
   const [character, setCharacter] = useState<Character | null>(null);
   const [dreamLoading, setDreamLoading] = useState(true);
-  const [vrmAnimationData, setVrmAnimationData] = useState<
-    VRMAnimationState | undefined
-  >(undefined);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -97,14 +93,14 @@ export default function DreamChatPage() {
         onRightMenuClick={() => setIsRightCardOpen(!isRightCardOpen)}
       />
 
-      <ChatBackground character={character} animationData={vrmAnimationData} />
+      <ChatBackground character={character} />
 
       <LeftCard isOpen={isLeftCardOpen} />
+
       <RightCard
         isOpen={isRightCardOpen}
         dreamId={dreamId}
         character={character}
-        onAnimationData={setVrmAnimationData}
       />
     </div>
   );
