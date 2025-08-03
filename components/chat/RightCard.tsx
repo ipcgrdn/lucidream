@@ -6,6 +6,7 @@ import ChatInput from "./ChatInput";
 
 import { getChatsByDreamIdPaginated, saveChatMessage } from "@/lib/dream_chats";
 import { Character } from "@/lib/characters";
+import { VRMAnimationState } from "@/vrm/vrm-animation";
 
 interface Message {
   role: "user" | "assistant";
@@ -16,12 +17,14 @@ interface RightCardProps {
   isOpen: boolean;
   dreamId: string;
   character: Character;
+  onAnimationData: (animationData: VRMAnimationState) => void;
 }
 
 export default function RightCard({
   isOpen,
   dreamId,
   character,
+  onAnimationData,
 }: RightCardProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
@@ -29,6 +32,54 @@ export default function RightCard({
   const [messagesLoading, setMessagesLoading] = useState(true);
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
+
+  // JSON 파싱을 위한 상태들
+  const [jsonBuffer, setJsonBuffer] = useState("");
+  const [extractingText, setExtractingText] = useState(false);
+  const [textExtractionComplete, setTextExtractionComplete] = useState(false);
+
+  // JSON에서 textResponse 값을 실시간으로 추출하는 함수
+  const extractTextFromJsonBuffer = (buffer: string): string => {
+    // "textResponse": 를 찾아서 그 뒤의 텍스트 값 추출
+    // 더 정확한 정규식: 이스케이프된 따옴표도 고려하고, 문자열 끝까지 추출
+    const textResponseMatch = buffer.match(
+      /"textResponse"\s*:\s*"((?:[^"\\]|\\.)*)"/
+    );
+    if (textResponseMatch) {
+      // 이스케이프된 문자들을 실제 문자로 변환
+      let extractedText = textResponseMatch[1]
+        .replace(/\\"/g, '"')
+        .replace(/\\n/g, "\n")
+        .replace(/\\t/g, "\t")
+        .replace(/\\r/g, "\r")
+        .replace(/\\\\/g, "\\");
+
+      return extractedText;
+    } else {
+      // 완전하지 않은 문자열도 처리 (스트리밍 중)
+      const partialMatch = buffer.match(
+        /"textResponse"\s*:\s*"((?:[^"\\]|\\.)*)$/
+      );
+      if (partialMatch) {
+        let extractedText = partialMatch[1]
+          .replace(/\\"/g, '"')
+          .replace(/\\n/g, "\n")
+          .replace(/\\t/g, "\t")
+          .replace(/\\r/g, "\r")
+          .replace(/\\\\/g, "\\");
+
+        return extractedText;
+      }
+    }
+    return "";
+  };
+
+  // 새 메시지 시작 시 JSON 파싱 상태 초기화
+  const resetJsonParsingState = () => {
+    setJsonBuffer("");
+    setExtractingText(false);
+    setTextExtractionComplete(false);
+  };
 
   // 최초 채팅 메시지 로드 (최근 20개)
   useEffect(() => {
@@ -94,6 +145,9 @@ export default function RightCard({
     setInputValue("");
     setIsLoading(true);
 
+    // JSON 파싱 상태 초기화
+    resetJsonParsingState();
+
     try {
       // 사용자 메시지를 데이터베이스에 저장
       await saveChatMessage(dreamId, userMessageContent, "user");
@@ -121,7 +175,6 @@ export default function RightCard({
       // 스트리밍 응답 처리
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
-      let assistantMessageContent = "";
 
       // 어시스턴트 메시지를 미리 추가하고 스트리밍으로 업데이트
       const assistantMessage: Message = {
@@ -143,24 +196,66 @@ export default function RightCard({
               if (line.startsWith("data: ")) {
                 try {
                   const data = JSON.parse(line.slice(6));
-                  if (data.content) {
-                    assistantMessageContent += data.content;
-                    // 실시간으로 메시지 업데이트
+
+                  if (data.type === "text_delta" && data.content) {
+                    // JSON 버퍼에 누적
+                    setJsonBuffer((prev) => {
+                      const newBuffer = prev + data.content;
+
+                      // textResponse 값 추출
+                      const extractedText =
+                        extractTextFromJsonBuffer(newBuffer);
+
+                      // "animation" 필드가 시작되면 텍스트 추출 완료
+                      if (
+                        newBuffer.includes('"animation"') &&
+                        !textExtractionComplete
+                      ) {
+                        setTextExtractionComplete(true);
+                      }
+
+                      // 텍스트 추출이 완료되지 않았다면 실시간 업데이트
+                      if (!textExtractionComplete && extractedText) {
+                        setMessages((prevMessages) => {
+                          const updatedMessages = [...prevMessages];
+                          updatedMessages[updatedMessages.length - 1] = {
+                            role: "assistant",
+                            content: extractedText,
+                          };
+                          return updatedMessages;
+                        });
+                      }
+
+                      return newBuffer;
+                    });
+                  } else if (data.type === "complete" && data.data) {
+                    // 완전한 AI 응답 (텍스트 + 애니메이션) 처리
+                    const aiResponse = data.data;
+
+                    // 최종 텍스트로 메시지 업데이트 (혹시 놓친 부분이 있을 수 있으므로)
                     setMessages((prev) => {
                       const updatedMessages = [...prev];
                       updatedMessages[updatedMessages.length - 1] = {
                         role: "assistant",
-                        content: assistantMessageContent,
+                        content: aiResponse.textResponse,
                       };
                       return updatedMessages;
                     });
-                  } else if (data.done) {
-                    // 스트리밍 완료 후 데이터베이스에 저장
+
+                    // 애니메이션 데이터를 VRM 컴포넌트로 전달
+                    onAnimationData(aiResponse.animation);
+
+                    // 데이터베이스에 저장
                     await saveChatMessage(
                       dreamId,
-                      assistantMessageContent,
+                      aiResponse.textResponse,
                       "character"
                     );
+
+                    // JSON 파싱 상태 초기화
+                    resetJsonParsingState();
+                  } else if (data.type === "done") {
+                    // 스트리밍 완료
                     break;
                   }
                 } catch (parseError) {

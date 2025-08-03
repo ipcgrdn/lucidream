@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/Authcontext";
 import { getDreamById, Dream } from "@/lib/dreams";
 import { getCharacterById, Character } from "@/lib/characters";
+import { VRMAnimationState } from "@/vrm/vrm-animation";
 
 import ChatNavbar from "@/components/chat/ChatNavbar";
 import ChatBackground from "@/components/chat/ChatBackground";
@@ -25,6 +26,9 @@ export default function DreamChatPage() {
   const [dream, setDream] = useState<Dream | null>(null);
   const [character, setCharacter] = useState<Character | null>(null);
   const [dreamLoading, setDreamLoading] = useState(true);
+  const [vrmAnimationData, setVrmAnimationData] = useState<
+    VRMAnimationState | undefined
+  >(undefined);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -93,13 +97,14 @@ export default function DreamChatPage() {
         onRightMenuClick={() => setIsRightCardOpen(!isRightCardOpen)}
       />
 
-      <ChatBackground character={character} />
+      <ChatBackground character={character} animationData={vrmAnimationData} />
 
       <LeftCard isOpen={isLeftCardOpen} />
       <RightCard
         isOpen={isRightCardOpen}
         dreamId={dreamId}
         character={character}
+        onAnimationData={setVrmAnimationData}
       />
     </div>
   );

@@ -4,13 +4,26 @@ import { useEffect, useRef } from "react";
 import { useFrame, useLoader } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { VRM, VRMLoaderPlugin } from "@pixiv/three-vrm";
+import { VRMAnimationState } from "@/vrm/vrm-animation";
+import { applyVRMAnimation } from "@/vrm/vrm-animation-controller";
+import {
+  applyVRMAnimationWithTiming,
+  updateVRMAnimations,
+} from "@/vrm/vrm-animation-timing";
 
 interface VRMModelProps {
   url: string;
+  animationData?: VRMAnimationState;
+  onAnimationComplete?: () => void;
 }
 
-export default function VRMModel({ url }: VRMModelProps) {
+export default function VRMModel({
+  url,
+  animationData,
+  onAnimationComplete,
+}: VRMModelProps) {
   const vrmRef = useRef<VRM | null>(null);
+  const animationAppliedRef = useRef<boolean>(false);
 
   // GLTFLoader에 VRM 플러그인 등록
   const gltf = useLoader(GLTFLoader, url, (loader) => {
@@ -66,10 +79,29 @@ export default function VRMModel({ url }: VRMModelProps) {
           rightHand.rotation.x = -0.2; // 손목 자연스럽게
         }
       }
-
-      console.log("VRM 로드 완료:", vrm);
     }
   }, [gltf]);
+
+  // 애니메이션 데이터 적용
+  useEffect(() => {
+    if (vrmRef.current && animationData) {
+      // 타이밍 정보가 있으면 타이밍 시스템 사용, 없으면 즉시 적용
+      if (animationData.timing) {
+        applyVRMAnimationWithTiming(
+          vrmRef.current,
+          animationData,
+          onAnimationComplete
+        );
+      } else {
+        applyVRMAnimation(vrmRef.current, animationData);
+        if (onAnimationComplete) {
+          onAnimationComplete();
+        }
+      }
+
+      animationAppliedRef.current = true;
+    }
+  }, [animationData, onAnimationComplete]);
 
   // 애니메이션 루프
   useFrame((state, delta) => {
@@ -77,10 +109,13 @@ export default function VRMModel({ url }: VRMModelProps) {
       // VRM 업데이트 (필수)
       vrmRef.current.update(delta);
 
+      // 타이밍 애니메이션 매니저 업데이트
+      updateVRMAnimations();
+
       const time = state.clock.elapsedTime;
 
-      // 표정 애니메이션
-      if (vrmRef.current.expressionManager) {
+      // 표정 애니메이션 (애니메이션 데이터가 없을 때만 기본 아이들 모션)
+      if (vrmRef.current.expressionManager && !animationData) {
         // 눈 깜빡임 (더 자연스럽게)
         const blinkTime = time * 0.5;
         const blinkValue = Math.sin(blinkTime) > 0.95 ? 1 : 0;
@@ -91,8 +126,8 @@ export default function VRMModel({ url }: VRMModelProps) {
         vrmRef.current.expressionManager.setValue("happy", happyValue);
       }
 
-      // 본(Bone) 애니메이션 - 미세한 움직임
-      if (vrmRef.current.humanoid) {
+      // 본(Bone) 애니메이션 - 미세한 움직임 (애니메이션 데이터가 없을 때만)
+      if (vrmRef.current.humanoid && !animationData) {
         // 숨쉬기 애니메이션 (가슴 확장)
         const breathe = Math.sin(time * 1.5) * 0.015;
         const spine = vrmRef.current.humanoid.getNormalizedBoneNode("spine");
