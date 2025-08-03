@@ -20,8 +20,8 @@ export default function DreamChatPage() {
   const router = useRouter();
   const dreamId = params.id as string;
 
-  const [isLeftCardOpen, setIsLeftCardOpen] = useState(true);
-  const [isRightCardOpen, setIsRightCardOpen] = useState(true);
+  const [isLeftCardOpen, setIsLeftCardOpen] = useState(false);
+  const [isRightCardOpen, setIsRightCardOpen] = useState(false);
 
   const [dream, setDream] = useState<Dream | null>(null);
   const [character, setCharacter] = useState<Character | null>(null);

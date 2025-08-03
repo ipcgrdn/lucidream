@@ -44,7 +44,7 @@ export default function Dream() {
     <div className="min-h-screen">
       {/* Top Navigation */}
       <nav className="absolute top-6 left-1/2 transform -translate-x-1/2 z-20">
-        <div className="flex items-center justify-between min-w-xl px-4 py-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full shadow-lg shadow-black/10">
+        <div className="flex items-center justify-between min-w-xs md:min-w-xl px-4 py-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full shadow-lg shadow-black/10">
           <Link href="/" className="flex items-center">
             <Image
               src="/logo.png"
@@ -53,7 +53,7 @@ export default function Dream() {
               height={40}
               priority
             />
-            <span className="text-white text-xl font-bold tracking-tight">
+            <span className="text-white text-xl font-bold tracking-tight hidden md:block">
               lucidream
             </span>
           </Link>
@@ -107,7 +107,7 @@ export default function Dream() {
       </nav>
 
       {/* Main Content */}
-      <main className="flex items-center justify-center min-h-screen overflow-hidden pt-20">
+      <main className="flex items-center justify-center min-h-screen overflow-hidden pt-0 md:pt-20">
         {/* Character Carousel */}
         <Carousel slides={characterData} userId={user?.id || ""} />
       </main>

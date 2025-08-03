@@ -115,13 +115,13 @@ export default function ChatMessages({
         <div className="flex justify-start">
           <div className="max-w-[80%] p-3 rounded-4xl mr-2">
             <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-black/60 rounded-full animate-bounce"></div>
+              <div className="w-1 h-1 bg-black/60 rounded-full animate-bounce"></div>
               <div
-                className="w-2 h-2 bg-black/60 rounded-full animate-bounce"
+                className="w-1 h-1 bg-black/60 rounded-full animate-bounce"
                 style={{ animationDelay: "0.1s" }}
               ></div>
               <div
-                className="w-2 h-2 bg-black/60 rounded-full animate-bounce"
+                className="w-1 h-1 bg-black/60 rounded-full animate-bounce"
                 style={{ animationDelay: "0.2s" }}
               ></div>
             </div>

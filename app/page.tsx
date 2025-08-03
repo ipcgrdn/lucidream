@@ -71,7 +71,7 @@ export default function Home() {
           />
         </div>
 
-        <h1 className="text-4xl md:text-6xl font-semibold mb-4 text-white">
+        <h1 className="text-4xl md:text-6xl font-semibold font-bowlby-one-sc mb-4 text-white">
           Dive into dreams
         </h1>
 

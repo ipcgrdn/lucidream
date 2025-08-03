@@ -65,7 +65,7 @@ export default function AuthPage() {
       </div>
 
       {/* Login Form - Can overlap with video */}
-      <div className="relative z-10 min-h-screen flex">
+      <div className="relative z-10 min-h-screen flex mx-4 md:mx-0">
         <div className="flex-1 flex items-center justify-center lg:justify-start lg:pl-12">
           <div className="w-full max-w-md bg-white/90 backdrop-blur-md rounded-4xl p-8 shadow-2xl">
             <div className="text-center mb-8">
