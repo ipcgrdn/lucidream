@@ -33,6 +33,8 @@ export default function RightCard({
   const [messagesLoading, setMessagesLoading] = useState(true);
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
+  const [autoTTS, setAutoTTS] = useState(true); // 자동 TTS 재생 설정
+  const [lastCompletedMessage, setLastCompletedMessage] = useState<string>("");
 
   // 최초 채팅 메시지 로드 (최근 20개)
   useEffect(() => {
@@ -90,6 +92,9 @@ export default function RightCard({
 
   const sendMessage = async () => {
     if (!inputValue.trim() || isLoading || !dreamId) return;
+
+    // 새 메시지 전송 시 이전 TTS 완료 상태 초기화
+    setLastCompletedMessage("");
 
     const userMessageContent = inputValue;
     const userMessage: Message = { role: "user", content: userMessageContent };
@@ -156,7 +161,7 @@ export default function RightCard({
                       const animationDetection = detectAnimationInStream(
                         assistantMessageContent
                       );
-                      
+
                       if (
                         animationDetection.hasAnimation &&
                         animationDetection.animationPreset
@@ -192,6 +197,11 @@ export default function RightCard({
                       finalCleanContent,
                       "character"
                     );
+
+                    // 자동 TTS를 위해 완료된 메시지 설정
+                    if (autoTTS) {
+                      setLastCompletedMessage(finalCleanContent);
+                    }
                     break;
                   }
                 } catch (parseError) {
@@ -236,6 +246,10 @@ export default function RightCard({
           hasMoreMessages={hasMoreMessages}
           loadingMoreMessages={loadingMoreMessages}
           onLoadMore={loadMoreMessages}
+          characterId={character.id}
+          onAnimationTrigger={onAnimationTrigger}
+          autoTTS={autoTTS}
+          lastCompletedMessage={lastCompletedMessage}
         />
 
         <ChatInput

@@ -1,7 +1,9 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import { LoaderTwo } from "../ui/loader";
+import { useTTS } from "@/hooks/useTTS";
+import { AnimationPresetType } from "@/lib/vrm-animations";
 
 interface Message {
   role: "user" | "assistant";
@@ -15,6 +17,10 @@ interface ChatMessagesProps {
   hasMoreMessages?: boolean;
   loadingMoreMessages?: boolean;
   onLoadMore?: () => void;
+  characterId?: string;
+  onAnimationTrigger?: (preset: AnimationPresetType) => void;
+  autoTTS?: boolean;
+  lastCompletedMessage?: string;
 }
 
 export default function ChatMessages({
@@ -24,9 +30,40 @@ export default function ChatMessages({
   hasMoreMessages = false,
   loadingMoreMessages = false,
   onLoadMore,
+  characterId,
+  onAnimationTrigger,
+  autoTTS = true,
+  lastCompletedMessage,
 }: ChatMessagesProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  // TTS 훅
+  const {
+    speak,
+    stop,
+    isLoading: ttsLoading,
+    isPlaying,
+  } = useTTS({
+    onStart: () => {
+      // 음성 재생 시작할 때 talking 애니메이션 트리거
+      onAnimationTrigger?.("talking");
+    },
+    onEnd: () => {
+      // 음성 재생 종료할 때 idle 애니메이션으로 복귀
+      onAnimationTrigger?.("idle");
+    },
+  });
+
+  // 새 메시지가 추가될 때 진행 중인 TTS 중단
+  useEffect(() => {
+    if (isPlaying && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage?.role === "user") {
+        stop(); // 사용자가 새 메시지를 보내면 TTS 중단
+      }
+    }
+  }, [messages, isPlaying, stop]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
@@ -61,6 +98,60 @@ export default function ChatMessages({
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
   }, [hasMoreMessages, loadingMoreMessages, onLoadMore]);
+
+  // TTS 재생 함수
+  const handleSpeak = useCallback(
+    (text: string) => {
+      // 캐릭터별 음성 ID 매핑 (한국어 지원 음성들)
+      const voiceMap: Record<string, string> = {
+        jessica: "pNInz6obpgDQGcFmaJgB", // Adam - 밝고 활발한 톤
+        reina: "21m00Tcm4TlvDq8ikWAM", // Rachel - 차분하고 우아한 톤
+        sia: "AZnzlk1XvdvUeBnXmlld", // Domi - 신비롭고 매력적인 톤
+      };
+
+      const voice_id = characterId ? voiceMap[characterId] : undefined;
+      speak(text, {
+        voice_id,
+        model_id: "eleven_multilingual_v2", // 한국어 지원 모델
+      });
+    },
+    [characterId, speak]
+  );
+
+  // 자동 TTS 재생
+  useEffect(() => {
+    if (autoTTS && lastCompletedMessage && lastCompletedMessage.trim()) {
+      // 마지막 메시지가 assistant 메시지인지 확인
+      const lastMessage = messages[messages.length - 1];
+      if (
+        lastMessage &&
+        lastMessage.role === "assistant" &&
+        lastMessage.content === lastCompletedMessage
+      ) {
+        // TTS가 이미 진행 중이거나 로딩 중이면 중단
+        if (isPlaying || ttsLoading) {
+          stop();
+        }
+
+        // 짧은 딜레이 후 자동 재생
+        const timer = setTimeout(() => {
+          const voiceMap: Record<string, string> = {
+            jessica: "pNInz6obpgDQGcFmaJgB",
+            reina: "21m00Tcm4TlvDq8ikWAM",
+            sia: "AZnzlk1XvdvUeBnXmlld",
+          };
+
+          const voice_id = characterId ? voiceMap[characterId] : undefined;
+          speak(lastCompletedMessage, {
+            voice_id,
+            model_id: "eleven_multilingual_v2",
+          });
+        }, 500);
+
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [lastCompletedMessage, autoTTS, messages]);
 
   if (messagesLoading) {
     return (
@@ -98,7 +189,7 @@ export default function ChatMessages({
             }`}
           >
             <div
-              className={`max-w-[80%] p-3 rounded-4xl ${
+              className={`max-w-[80%] p-3 rounded-2xl relative group ${
                 message.role === "user"
                   ? "bg-black/10 text-white ml-2"
                   : "bg-white/10 text-black mr-2"
@@ -107,13 +198,63 @@ export default function ChatMessages({
               <p className="text-sm leading-relaxed whitespace-pre-wrap">
                 {message.content}
               </p>
+
+              {/* AI 메시지 중앙에 TTS 버튼 오버레이 */}
+              {message.role === "assistant" && (
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black/20 rounded-2xl backdrop-blur-sm">
+                  <button
+                    onClick={() => {
+                      if (isPlaying) {
+                        stop();
+                      } else {
+                        handleSpeak(message.content);
+                      }
+                    }}
+                    disabled={ttsLoading || isLoading}
+                    className="p-3 rounded-full bg-white/50 hover:bg-white/80 shadow-lg disabled:opacity-50 transform hover:scale-105 transition-all duration-200"
+                    title={
+                      isLoading
+                        ? "새 메시지 생성 중..."
+                        : isPlaying
+                        ? "음성 중지"
+                        : "음성으로 듣기"
+                    }
+                  >
+                    {ttsLoading ? (
+                      <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+                    ) : isPlaying ? (
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="text-gray-700"
+                      >
+                        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                      </svg>
+                    ) : (
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="text-gray-700"
+                      >
+                        <path d="M3 9v6h4l5 5V4L7 9H3z" />
+                        <path d="M16.5 12A4.5 4.5 0 0014 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
+                        <path d="M19 12c0-2.53-1.61-4.86-4-5.87v11.74c2.39-1.01 4-3.34 4-5.87z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ))
       )}
       {isLoading && (
         <div className="flex justify-start">
-          <div className="max-w-[80%] p-3 rounded-4xl mr-2">
+          <div className="max-w-[80%] p-3 rounded-2xl mr-2">
             <div className="flex space-x-1">
               <div className="w-1 h-1 bg-black/60 rounded-full animate-bounce"></div>
               <div
