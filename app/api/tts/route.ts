@@ -22,10 +22,10 @@ const DEFAULT_VOICE_SETTINGS = {
 
 // 캐릭터별 음성 ID 매핑 (한국어 지원 음성들)
 const CHARACTER_VOICES = {
-  jessica: "pNInz6obpgDQGcFmaJgB", // Adam - 밝고 활발한 톤
-  reina: "21m00Tcm4TlvDq8ikWAM", // Rachel - 차분하고 우아한 톤  
-  sia: "AZnzlk1XvdvUeBnXmlld", // Domi - 신비롭고 매력적인 톤
-  default: "21m00Tcm4TlvDq8ikWAM", // Rachel
+  jessica: "54Cze5LrTSyLgbO6Fhlc", // Adam - 밝고 활발한 톤
+  reina: "vGQNBgLaiM3EdZtxIiuY", // Rachel - 차분하고 우아한 톤  
+  sia: "kdmDKE6EkgrWrrykO9Qt", // Domi - 신비롭고 매력적인 톤
+  default: "kdmDKE6EkgrWrrykO9Qt", // Rachel
 };
 
 export async function POST(request: NextRequest) {

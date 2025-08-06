@@ -4,30 +4,31 @@ import { useEffect, useRef } from "react";
 import { useFrame, useLoader } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { VRM, VRMLoaderPlugin } from "@pixiv/three-vrm";
-import {
-  VRMAnimationManager,
-  AnimationPresetType,
-  getAnimationConfig,
-} from "@/lib/vrm-animations";
+import { VRMAnimationLoaderPlugin } from "@pixiv/three-vrm-animation";
+import { AnimationPresetType, getAnimationConfig } from "@/lib/vrm-animations";
+import { VRMAAnimationManager } from "@/lib/vrma-animation-manager";
 
 interface VRMModelProps {
   url: string;
   animationPreset?: AnimationPresetType;
   onAnimationChange?: (preset: AnimationPresetType) => void;
+  onLoaded?: () => void;
 }
 
 export default function VRMModel({
   url,
   animationPreset = "idle",
   onAnimationChange,
+  onLoaded,
 }: VRMModelProps) {
   const vrmRef = useRef<VRM | null>(null);
-  const animationManagerRef = useRef<VRMAnimationManager | null>(null);
+  const animationManagerRef = useRef<VRMAAnimationManager | null>(null);
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // GLTFLoader에 VRM 플러그인 등록
+  // GLTFLoader에 VRM 및 VRMA 플러그인 등록
   const gltf = useLoader(GLTFLoader, url, (loader) => {
     loader.register((parser) => new VRMLoaderPlugin(parser));
+    loader.register((parser) => new VRMAnimationLoaderPlugin(parser));
   });
 
   useEffect(() => {
@@ -48,36 +49,47 @@ export default function VRMModel({
         obj.frustumCulled = false;
       });
 
-      // 새로운 애니메이션 매니저 초기화
+      // 새로운 VRMA 기반 애니메이션 매니저 초기화
       if (!animationManagerRef.current) {
-        animationManagerRef.current = new VRMAnimationManager(vrm);
-        // 초기 idle 애니메이션 시작
+        animationManagerRef.current = new VRMAAnimationManager(vrm);
+        // 초기 idle 애니메이션 시작 (비동기)
         animationManagerRef.current.playAnimation("idle", 0.5);
       }
+
+      // 로딩 완료 콜백 호출
+      onLoaded?.();
     }
-  }, [gltf]);
+  }, [gltf, onLoaded]);
 
   // 애니메이션 프리셋 변경 감지
   useEffect(() => {
-    if (animationManagerRef.current && animationPreset) {
-      // 기존 타이머 정리
-      if (animationTimeoutRef.current) {
-        clearTimeout(animationTimeoutRef.current);
+    const playNewAnimation = async () => {
+      if (animationManagerRef.current && animationPreset) {
+        // 기존 타이머 정리
+        if (animationTimeoutRef.current) {
+          clearTimeout(animationTimeoutRef.current);
+        }
+
+        try {
+          // 새 VRMA 애니메이션 시작 (비동기)
+          await animationManagerRef.current.playAnimation(animationPreset, 0.5);
+
+          // idle이 아닌 경우에만 자동 복귀 타이머 설정
+          if (animationPreset !== "idle") {
+            const config = getAnimationConfig(animationPreset);
+            const totalDuration = (config.duration + 1.0) * 1000;
+
+            animationTimeoutRef.current = setTimeout(() => {
+              onAnimationChange?.("idle");
+            }, totalDuration);
+          }
+        } catch (error) {
+          console.error(`애니메이션 재생 실패: ${animationPreset}`, error);
+        }
       }
+    };
 
-      // 새 애니메이션 시작
-      animationManagerRef.current.playAnimation(animationPreset, 0.5);
-
-      // idle이 아닌 경우에만 자동 복귀 타이머 설정
-      if (animationPreset !== "idle") {
-        const config = getAnimationConfig(animationPreset);
-        const totalDuration = (config.duration + 1.0) * 1000; // 전환시간 0.5초 + 애니메이션 지속시간 + 여유시간
-
-        animationTimeoutRef.current = setTimeout(() => {
-          onAnimationChange?.("idle");
-        }, totalDuration);
-      }
-    }
+    playNewAnimation();
   }, [animationPreset, onAnimationChange]);
 
   // 컴포넌트 언마운트 시 정리

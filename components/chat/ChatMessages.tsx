@@ -31,7 +31,6 @@ export default function ChatMessages({
   loadingMoreMessages = false,
   onLoadMore,
   characterId,
-  onAnimationTrigger,
   autoTTS = true,
   lastCompletedMessage,
 }: ChatMessagesProps) {
@@ -39,21 +38,7 @@ export default function ChatMessages({
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   // TTS 훅
-  const {
-    speak,
-    stop,
-    isLoading: ttsLoading,
-    isPlaying,
-  } = useTTS({
-    onStart: () => {
-      // 음성 재생 시작할 때 talking 애니메이션 트리거
-      onAnimationTrigger?.("talking");
-    },
-    onEnd: () => {
-      // 음성 재생 종료할 때 idle 애니메이션으로 복귀
-      onAnimationTrigger?.("idle");
-    },
-  });
+  const { speak, stop, isLoading: ttsLoading, isPlaying } = useTTS();
 
   // 새 메시지가 추가될 때 진행 중인 TTS 중단
   useEffect(() => {
@@ -104,9 +89,9 @@ export default function ChatMessages({
     (text: string) => {
       // 캐릭터별 음성 ID 매핑 (한국어 지원 음성들)
       const voiceMap: Record<string, string> = {
-        jessica: "pNInz6obpgDQGcFmaJgB", // Adam - 밝고 활발한 톤
-        reina: "21m00Tcm4TlvDq8ikWAM", // Rachel - 차분하고 우아한 톤
-        sia: "AZnzlk1XvdvUeBnXmlld", // Domi - 신비롭고 매력적인 톤
+        jessica: "54Cze5LrTSyLgbO6Fhlc", // Adam - 밝고 활발한 톤
+        reina: "vGQNBgLaiM3EdZtxIiuY", // Rachel - 차분하고 우아한 톤
+        sia: "kdmDKE6EkgrWrrykO9Qt", // Domi - 신비롭고 매력적인 톤
       };
 
       const voice_id = characterId ? voiceMap[characterId] : undefined;
@@ -136,9 +121,9 @@ export default function ChatMessages({
         // 짧은 딜레이 후 자동 재생
         const timer = setTimeout(() => {
           const voiceMap: Record<string, string> = {
-            jessica: "pNInz6obpgDQGcFmaJgB",
-            reina: "21m00Tcm4TlvDq8ikWAM",
-            sia: "AZnzlk1XvdvUeBnXmlld",
+            jessica: "54Cze5LrTSyLgbO6Fhlc",
+            reina: "vGQNBgLaiM3EdZtxIiuY",
+            sia: "kdmDKE6EkgrWrrykO9Qt",
           };
 
           const voice_id = characterId ? voiceMap[characterId] : undefined;

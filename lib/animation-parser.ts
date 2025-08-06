@@ -25,15 +25,15 @@ export function parseAnimationFromResponse(response: string): ParsedResponse {
       "surprised",
       "thinking",
       "greeting",
-      "nodding",
-      "talking",
     ];
 
     if (validPresets.includes(extractedPreset as AnimationPresetType)) {
       animationPreset = extractedPreset as AnimationPresetType;
     } else {
       // 잘못된 프리셋 이름 로깅 및 기본값 사용
-      console.warn(`[Invalid Animation]: "${extractedPreset}" is not a valid preset. Using "idle" instead.`);
+      console.warn(
+        `[Invalid Animation]: "${extractedPreset}" is not a valid preset. Using "idle" instead.`
+      );
       console.warn(`[Valid Presets]: ${validPresets.join(", ")}`);
       animationPreset = "idle";
     }
@@ -67,8 +67,6 @@ export function detectAnimationInStream(currentContent: string): {
       "surprised",
       "thinking",
       "greeting",
-      "nodding",
-      "talking",
     ];
 
     if (validPresets.includes(extractedPreset as AnimationPresetType)) {
@@ -79,7 +77,9 @@ export function detectAnimationInStream(currentContent: string): {
       };
     } else {
       // 잘못된 프리셋 감지시 로깅하고 무시
-      console.warn(`[Invalid Animation Stream]: "${extractedPreset}" is not valid. Ignoring animation.`);
+      console.warn(
+        `[Invalid Animation Stream]: "${extractedPreset}" is not valid. Ignoring animation.`
+      );
     }
   }
 
