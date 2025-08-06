@@ -44,14 +44,14 @@ export default function ChatInput({
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyPress}
         placeholder="Ask something..."
-        className="flex w-full bg-white/10 border border-white/10 rounded-4xl px-3 py-2 text-sm text-black placeholder-black/50 resize-none focus:outline-none overflow-hidden items-center"
+        className="flex w-full bg-white/5 border border-white/10 rounded-2xl px-3 py-2 text-sm text-white placeholder-white/70 resize-none focus:outline-none focus:bg-white/10 focus:border-white/30 transition-all duration-200 overflow-hidden items-center backdrop-blur-sm"
         style={{ height: "40px", maxHeight: "80px" }}
         disabled={isLoading}
       />
       <button
         onClick={onSendMessage}
         disabled={!inputValue.trim() || isLoading}
-        className="bg-white/10 hover:bg-white/20 disabled:bg-white/10 disabled:text-white/30 text-black p-2 rounded-4xl transition-colors duration-200 flex items-center justify-center w-[40px] h-[40px] flex-shrink-0"
+        className="bg-white/15 hover:bg-white/25 disabled:bg-white/5 disabled:text-white/30 text-white p-2 rounded-2xl transition-all duration-200 flex items-center justify-center w-[40px] h-[40px] flex-shrink-0 backdrop-blur-sm border border-white/10 hover:border-white/20"
       >
         {isLoading ? (
           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

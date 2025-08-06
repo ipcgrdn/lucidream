@@ -24,6 +24,7 @@ export default function VRMModel({
   const vrmRef = useRef<VRM | null>(null);
   const animationManagerRef = useRef<VRMAAnimationManager | null>(null);
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const currentAnimationRef = useRef<AnimationPresetType>("idle");
 
   // GLTFLoader에 VRM 및 VRMA 플러그인 등록
   const gltf = useLoader(GLTFLoader, url, (loader) => {
@@ -65,6 +66,14 @@ export default function VRMModel({
   useEffect(() => {
     const playNewAnimation = async () => {
       if (animationManagerRef.current && animationPreset) {
+        // 현재 애니메이션과 같으면 스킵
+        if (currentAnimationRef.current === animationPreset) {
+          return;
+        }
+
+        // 현재 애니메이션 상태 업데이트
+        currentAnimationRef.current = animationPreset;
+
         // 기존 타이머 정리
         if (animationTimeoutRef.current) {
           clearTimeout(animationTimeoutRef.current);
@@ -90,7 +99,7 @@ export default function VRMModel({
     };
 
     playNewAnimation();
-  }, [animationPreset, onAnimationChange]);
+  }, [animationPreset]);
 
   // 컴포넌트 언마운트 시 정리
   useEffect(() => {

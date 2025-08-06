@@ -1,13 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import ChatMessages from "./ChatMessages";
-import ChatInput from "./ChatInput";
-
-import { getChatsByDreamIdPaginated, saveChatMessage } from "@/lib/dream_chats";
 import { Character } from "@/lib/characters";
 import { AnimationPresetType } from "@/lib/vrm-animations";
-import { detectAnimationInStream } from "@/lib/animation-parser";
 
 interface Message {
   role: "user" | "assistant";
@@ -16,215 +11,31 @@ interface Message {
 
 interface RightCardProps {
   isOpen: boolean;
-  dreamId: string;
+  messages: Message[];
+  messagesLoading: boolean;
+  hasMoreMessages: boolean;
+  loadingMoreMessages: boolean;
+  onLoadMore: () => void;
   character: Character;
   onAnimationTrigger?: (preset: AnimationPresetType) => void;
+  isLoading: boolean;
+  autoTTS: boolean;
+  lastCompletedMessage: string;
 }
 
 export default function RightCard({
   isOpen,
-  dreamId,
+  messages,
+  messagesLoading,
+  hasMoreMessages,
+  loadingMoreMessages,
+  onLoadMore,
   character,
   onAnimationTrigger,
+  isLoading,
+  autoTTS,
+  lastCompletedMessage,
 }: RightCardProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [inputValue, setInputValue] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [messagesLoading, setMessagesLoading] = useState(true);
-  const [hasMoreMessages, setHasMoreMessages] = useState(false);
-  const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
-  const [autoTTS, setAutoTTS] = useState(true); // 자동 TTS 재생 설정
-  const [lastCompletedMessage, setLastCompletedMessage] = useState<string>("");
-
-  // 최초 채팅 메시지 로드 (최근 20개)
-  useEffect(() => {
-    const loadInitialMessages = async () => {
-      if (!dreamId) return;
-
-      setMessagesLoading(true);
-      try {
-        const { chats, hasMore } = await getChatsByDreamIdPaginated(
-          dreamId,
-          20,
-          0
-        );
-        const convertedMessages: Message[] = chats.map((chat) => ({
-          role: chat.type === "user" ? "user" : "assistant",
-          content: chat.message,
-        }));
-        setMessages(convertedMessages);
-        setHasMoreMessages(hasMore);
-      } catch (error) {
-        console.error("메시지 로딩 에러:", error);
-      } finally {
-        setMessagesLoading(false);
-      }
-    };
-
-    loadInitialMessages();
-  }, [dreamId]);
-
-  // 더 많은 메시지 로드
-  const loadMoreMessages = async () => {
-    if (loadingMoreMessages || !hasMoreMessages || !dreamId) return;
-
-    setLoadingMoreMessages(true);
-    try {
-      const { chats, hasMore } = await getChatsByDreamIdPaginated(
-        dreamId,
-        20,
-        messages.length
-      );
-      const convertedMessages: Message[] = chats.map((chat) => ({
-        role: chat.type === "user" ? "user" : "assistant",
-        content: chat.message,
-      }));
-
-      // 기존 메시지 앞에 추가
-      setMessages((prev) => [...convertedMessages, ...prev]);
-      setHasMoreMessages(hasMore);
-    } catch (error) {
-      console.error("추가 메시지 로딩 에러:", error);
-    } finally {
-      setLoadingMoreMessages(false);
-    }
-  };
-
-  const sendMessage = async () => {
-    if (!inputValue.trim() || isLoading || !dreamId) return;
-
-    // 새 메시지 전송 시 이전 TTS 완료 상태 초기화
-    setLastCompletedMessage("");
-
-    const userMessageContent = inputValue;
-    const userMessage: Message = { role: "user", content: userMessageContent };
-    const newMessages = [...messages, userMessage];
-    setMessages(newMessages);
-    setInputValue("");
-    setIsLoading(true);
-
-    try {
-      // 사용자 메시지를 데이터베이스에 저장
-      await saveChatMessage(dreamId, userMessageContent, "user");
-
-      // OpenAI API 호출 - 최근 10개 메시지만 전송
-      const recentMessages = newMessages.slice(-10);
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messages: recentMessages.map((msg) => ({
-            role: msg.role,
-            content: msg.content,
-          })),
-          characterId: character.id,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to send message");
-      }
-
-      // 스트리밍 응답 처리
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let assistantMessageContent = "";
-      let hasTriggeredAnimation = false;
-
-      // 어시스턴트 메시지를 미리 추가하고 스트리밍으로 업데이트
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: "",
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-
-      if (reader) {
-        try {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            const chunk = decoder.decode(value);
-            const lines = chunk.split("\n");
-
-            for (const line of lines) {
-              if (line.startsWith("data: ")) {
-                try {
-                  const data = JSON.parse(line.slice(6));
-                  if (data.content) {
-                    assistantMessageContent += data.content;
-
-                    // 애니메이션 감지 (한 번만 실행)
-                    if (!hasTriggeredAnimation) {
-                      const animationDetection = detectAnimationInStream(
-                        assistantMessageContent
-                      );
-
-                      if (
-                        animationDetection.hasAnimation &&
-                        animationDetection.animationPreset
-                      ) {
-                        onAnimationTrigger?.(
-                          animationDetection.animationPreset
-                        );
-                        hasTriggeredAnimation = true;
-                      }
-                    }
-
-                    // 애니메이션 태그를 제거한 깨끗한 텍스트로 메시지 업데이트
-                    const cleanContent = detectAnimationInStream(
-                      assistantMessageContent
-                    ).cleanedContent;
-
-                    // 실시간으로 메시지 업데이트
-                    setMessages((prev) => {
-                      const updatedMessages = [...prev];
-                      updatedMessages[updatedMessages.length - 1] = {
-                        role: "assistant",
-                        content: cleanContent,
-                      };
-                      return updatedMessages;
-                    });
-                  } else if (data.done) {
-                    // 스트리밍 완료 후 데이터베이스에 저장 (애니메이션 태그 제거된 텍스트로)
-                    const finalCleanContent = detectAnimationInStream(
-                      assistantMessageContent
-                    ).cleanedContent;
-                    await saveChatMessage(
-                      dreamId,
-                      finalCleanContent,
-                      "character"
-                    );
-
-                    // 자동 TTS를 위해 완료된 메시지 설정
-                    if (autoTTS) {
-                      setLastCompletedMessage(finalCleanContent);
-                    }
-                    break;
-                  }
-                } catch (parseError) {
-                  console.error("JSON parse error:", parseError);
-                }
-              }
-            }
-          }
-        } finally {
-          reader.releaseLock();
-        }
-      }
-    } catch (error) {
-      console.error("Error sending message:", error);
-      const errorMessage: Message = {
-        role: "assistant",
-        content: "오류가 발생했습니다. 다시 시도해주세요.",
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <div
@@ -245,18 +56,11 @@ export default function RightCard({
           messagesLoading={messagesLoading}
           hasMoreMessages={hasMoreMessages}
           loadingMoreMessages={loadingMoreMessages}
-          onLoadMore={loadMoreMessages}
+          onLoadMore={onLoadMore}
           characterId={character.id}
           onAnimationTrigger={onAnimationTrigger}
           autoTTS={autoTTS}
           lastCompletedMessage={lastCompletedMessage}
-        />
-
-        <ChatInput
-          inputValue={inputValue}
-          setInputValue={setInputValue}
-          onSendMessage={sendMessage}
-          isLoading={isLoading}
         />
       </div>
     </div>

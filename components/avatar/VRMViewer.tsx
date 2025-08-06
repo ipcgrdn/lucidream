@@ -96,11 +96,6 @@ export default function VRMViewer({
           />
         </Suspense>
       </Canvas>
-
-      {/* 컨트롤 가이드 */}
-      <div className="absolute bottom-4 right-4 text-white/60 text-xs">
-        <p>좌클릭으로 회전 • 휠로 줌 • 우클릭으로 이동</p>
-      </div>
     </div>
   );
 }
