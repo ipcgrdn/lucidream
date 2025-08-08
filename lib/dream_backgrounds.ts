@@ -54,7 +54,7 @@ export async function uploadBackgroundImage(
     const filePath = `${user.user.id}/${fileName}`;
 
     // Storage에 파일 업로드
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from("backgrounds")
       .upload(filePath, file, {
         cacheControl: "3600",

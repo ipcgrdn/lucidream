@@ -127,7 +127,7 @@ export default function LevelUpCelebration({
               {newLevel.name}
             </h2>
             <p className="text-white/90 text-lg mt-2 italic">
-              "{newLevel.description}"
+              &quot;{newLevel.description}&quot;
             </p>
           </div>
         </div>
