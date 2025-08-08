@@ -4,6 +4,7 @@ export interface Dream {
   id: string;
   user_id: string;
   character_id: string;
+  affection_points: number;
   created_at?: string;
   updated_at?: string;
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import { AffectionSystem } from "@/lib/affection";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -7,7 +8,8 @@ const openai = new OpenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const { messages, characterId } = await request.json();
+    const { messages, characterId, currentAffectionPoints } =
+      await request.json();
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json(
@@ -61,19 +63,33 @@ INVALID examples (DO NOT USE):
 
 CRITICAL: Every response must start with [ANIMATION:preset_name] using ONLY the 6 valid preset names.`;
 
-    let finalSystemPrompt = baseSystemPrompt;
+    let systemPrompt = baseSystemPrompt;
 
+    // 호감도 시스템 추가
+    if (typeof currentAffectionPoints === "number") {
+      const affectionAnalysisPrompt =
+        AffectionSystem.getAffectionAnalysisPrompt();
+      const currentLevel = AffectionSystem.calculateLevel(
+        currentAffectionPoints
+      );
+      const characterToneModifier =
+        AffectionSystem.getCharacterResponseModifier(currentLevel);
+
+      systemPrompt += `\n\n${affectionAnalysisPrompt}\n\n=== CURRENT RELATIONSHIP STATUS ===\nCurrent Affection Level: ${currentLevel.name} (${currentAffectionPoints} points)\nResponse Tone Adjustment: ${characterToneModifier}`;
+    }
+
+    // 캐릭터 시스템 프롬프트 추가
     if (characterId) {
       const { getCharacterById } = await import("@/lib/characters");
       const character = getCharacterById(characterId);
       if (character && character.systemPrompt) {
-        finalSystemPrompt = `${baseSystemPrompt}\n\n=== CHARACTER PERSONA ===\n${character.systemPrompt}\n\nRemember: Fully embody this character while following the core directives above. You ARE this character living in the LuciDream virtual world.`;
+        systemPrompt += `\n\n=== CHARACTER PERSONA ===\n${character.systemPrompt}\n\nRemember: Fully embody this character while following the core directives above. You ARE this character living in the LuciDream virtual world.`;
       }
     }
 
     // 시스템 메시지를 맨 앞에 추가
     const messagesWithSystem = [
-      { role: "system", content: finalSystemPrompt },
+      { role: "system", content: systemPrompt },
       ...messages,
     ];
 

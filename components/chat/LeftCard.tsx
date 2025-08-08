@@ -7,6 +7,7 @@ import { Dream } from "@/lib/dreams";
 import CharacterSection from "./sections/CharacterSection";
 import AudioSection from "./sections/AudioSection";
 import DreamSection from "./sections/DreamSection";
+import { Flower, Headphones, UserRound } from "lucide-react";
 
 export type LeftCardSection = "character" | "audio" | "dream";
 
@@ -14,6 +15,7 @@ interface LeftCardProps {
   isOpen: boolean;
   character?: Character;
   dream?: Dream;
+  affectionPoints?: number;
   autoTTS?: boolean;
   onAutoTTSToggle?: () => void;
 }
@@ -22,6 +24,7 @@ export default function LeftCard({
   isOpen,
   character,
   dream,
+  affectionPoints,
   autoTTS,
   onAutoTTSToggle,
 }: LeftCardProps) {
@@ -67,19 +70,7 @@ export default function LeftCard({
                 }
               `}
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
+              <UserRound className="w-5 h-5" />
             </button>
 
             {/* 오디오 섹션 */}
@@ -94,19 +85,7 @@ export default function LeftCard({
                 }
               `}
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M9 12a3 3 0 106 0v-5a3 3 0 10-6 0v5z"
-                />
-              </svg>
+              <Headphones className="w-5 h-5" />
             </button>
 
             {/* Dream 섹션 */}
@@ -121,19 +100,7 @@ export default function LeftCard({
                 }
               `}
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                />
-              </svg>
+              <Flower className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -141,7 +108,10 @@ export default function LeftCard({
         {/* 섹션 내용 */}
         <div className="flex-1 overflow-hidden">
           {activeSection === "character" && (
-            <CharacterSection character={character} />
+            <CharacterSection
+              character={character}
+              affectionPoints={affectionPoints}
+            />
           )}
 
           {activeSection === "audio" && (

@@ -16,6 +16,9 @@ import ChatInput from "@/components/chat/ChatInput";
 import { LoaderTwo } from "@/components/ui/loader";
 import { getChatsByDreamIdPaginated, saveChatMessage } from "@/lib/dream_chats";
 import { detectAnimationInStream } from "@/lib/animation-parser";
+import { detectAffectionInStream } from "@/lib/affection-parser";
+import { AffectionSystem, AffectionLevel } from "@/lib/affection";
+import LevelUpCelebration from "@/components/ui/level-up-celebration";
 
 export default function DreamChatPage() {
   const { user, loading } = useAuth();
@@ -58,12 +61,36 @@ export default function DreamChatPage() {
   const [messagesLoading, setMessagesLoading] = useState(true);
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
-  const [autoTTS, setAutoTTS] = useState(true);
+  const [autoTTS, setAutoTTS] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("autoTTS");
+      return saved ? JSON.parse(saved) : true;
+    }
+    return true;
+  });
   const [lastCompletedMessage, setLastCompletedMessage] = useState<string>("");
+
+  // 호감도 상태 관리
+  const [currentAffectionPoints, setCurrentAffectionPoints] =
+    useState<number>(50);
+
+  // 레벨업 축하 상태
+  const [isLevelUpVisible, setIsLevelUpVisible] = useState(false);
+  const [previousLevel, setPreviousLevel] = useState<AffectionLevel | null>(
+    null
+  );
+  const [newLevel, setNewLevel] = useState<AffectionLevel | null>(null);
 
   // 애니메이션 변경 핸들러
   const handleAnimationChange = useCallback((preset: AnimationPresetType) => {
     setCurrentAnimation(preset);
+  }, []);
+
+  // 레벨업 축하 완료 핸들러
+  const handleLevelUpComplete = useCallback(() => {
+    setIsLevelUpVisible(false);
+    setPreviousLevel(null);
+    setNewLevel(null);
   }, []);
 
   useEffect(() => {
@@ -103,6 +130,7 @@ export default function DreamChatPage() {
 
         setDream(dreamData);
         setCharacter(characterData);
+        setCurrentAffectionPoints(dreamData.affection_points);
       } catch (error) {
         console.error("Dream 데이터 로딩 에러:", error);
         router.push("/dream");
@@ -198,6 +226,7 @@ export default function DreamChatPage() {
             content: msg.content,
           })),
           characterId: character.id,
+          currentAffectionPoints: currentAffectionPoints,
         }),
       });
 
@@ -210,6 +239,7 @@ export default function DreamChatPage() {
       const decoder = new TextDecoder();
       let assistantMessageContent = "";
       let hasTriggeredAnimation = false;
+      let detectedAffectionChange = 0;
 
       // 어시스턴트 메시지를 미리 추가하고 스트리밍으로 업데이트
       const assistantMessage: Message = {
@@ -251,10 +281,23 @@ export default function DreamChatPage() {
                       }
                     }
 
-                    // 애니메이션 태그를 제거한 깨끗한 텍스트로 메시지 업데이트
-                    const cleanContent = detectAnimationInStream(
+                    // 애니메이션과 호감도 태그를 제거한 깨끗한 텍스트로 메시지 업데이트
+                    const animationResult = detectAnimationInStream(
                       assistantMessageContent
-                    ).cleanedContent;
+                    );
+                    const affectionResult = detectAffectionInStream(
+                      animationResult.cleanedContent
+                    );
+
+                    // 호감도 변화 감지
+                    if (
+                      affectionResult.hasAffectionChange &&
+                      detectedAffectionChange === 0
+                    ) {
+                      detectedAffectionChange = affectionResult.affectionChange;
+                    }
+
+                    const cleanContent = affectionResult.cleanedContent;
 
                     // 실시간으로 메시지 업데이트
                     setMessages((prev) => {
@@ -266,15 +309,64 @@ export default function DreamChatPage() {
                       return updatedMessages;
                     });
                   } else if (data.done) {
-                    // 스트리밍 완료 후 데이터베이스에 저장 (애니메이션 태그 제거된 텍스트로)
-                    const finalCleanContent = detectAnimationInStream(
+                    // 스트리밍 완료 후 데이터베이스에 저장 (모든 태그 제거된 텍스트로)
+                    const finalAnimationResult = detectAnimationInStream(
                       assistantMessageContent
-                    ).cleanedContent;
+                    );
+                    const finalAffectionResult = detectAffectionInStream(
+                      finalAnimationResult.cleanedContent
+                    );
+                    const finalCleanContent =
+                      finalAffectionResult.cleanedContent;
+
                     await saveChatMessage(
                       dreamId,
                       finalCleanContent,
                       "character"
                     );
+
+                    // 호감도 변화가 있으면 업데이트
+                    if (detectedAffectionChange !== 0) {
+                      const newAffectionPoints = Math.max(
+                        -100,
+                        Math.min(
+                          currentAffectionPoints + detectedAffectionChange,
+                          2000
+                        )
+                      );
+
+                      // 레벨업 체크
+                      const shouldTriggerLevelUp =
+                        AffectionSystem.shouldTriggerSpecialResponse(
+                          currentAffectionPoints,
+                          newAffectionPoints
+                        );
+
+                      if (shouldTriggerLevelUp) {
+                        const oldLevel = AffectionSystem.calculateLevel(
+                          currentAffectionPoints
+                        );
+                        const currentNewLevel =
+                          AffectionSystem.calculateLevel(newAffectionPoints);
+
+                        setPreviousLevel(oldLevel);
+                        setNewLevel(currentNewLevel);
+                        setIsLevelUpVisible(true);
+                      }
+
+                      setCurrentAffectionPoints(newAffectionPoints);
+
+                      // 데이터베이스에 호감도 업데이트
+                      try {
+                        const { supabase } = await import("@/lib/supabase");
+                        await supabase
+                          .from("dreams")
+                          .update({ affection_points: newAffectionPoints })
+                          .eq("id", dreamId);
+                      } catch (error) {
+                        console.error("호감도 업데이트 에러:", error);
+                      }
+                    }
 
                     // 자동 TTS를 위해 완료된 메시지 설정
                     if (autoTTS) {
@@ -346,8 +438,13 @@ export default function DreamChatPage() {
         isOpen={isLeftCardOpen}
         character={character}
         dream={dream}
+        affectionPoints={currentAffectionPoints}
         autoTTS={autoTTS}
-        onAutoTTSToggle={() => setAutoTTS(!autoTTS)}
+        onAutoTTSToggle={() => {
+          const newAutoTTS = !autoTTS;
+          setAutoTTS(newAutoTTS);
+          localStorage.setItem("autoTTS", JSON.stringify(newAutoTTS));
+        }}
       />
 
       <RightCard
@@ -366,7 +463,7 @@ export default function DreamChatPage() {
 
       {/* 페이지 하단 중앙에 ChatInput 배치 */}
       <div className="fixed bottom-0 md:bottom-6 left-1/2 -translate-x-1/2 w-full max-w-md z-10">
-        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-4 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] border border-white/20 before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/20 before:to-transparent before:rounded-3xl before:pointer-events-none relative overflow-hidden">
+        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-2 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] border border-white/20 before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/20 before:to-transparent before:rounded-3xl before:pointer-events-none relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-white/5 rounded-4xl"></div>
           <div className="relative z-10">
             <ChatInput
@@ -378,6 +475,17 @@ export default function DreamChatPage() {
           </div>
         </div>
       </div>
+
+      {/* Level Up Celebration Modal */}
+      {previousLevel && newLevel && (
+        <LevelUpCelebration
+          isVisible={isLevelUpVisible}
+          previousLevel={previousLevel}
+          newLevel={newLevel}
+          characterName={character?.name}
+          onComplete={handleLevelUpComplete}
+        />
+      )}
     </div>
   );
 }
