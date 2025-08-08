@@ -2,7 +2,7 @@
 
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import VRMModel from "./VRMModel";
 import { AnimationPresetType } from "@/lib/vrm-animations";
 import { LoaderTwo } from "@/components/ui/loader";
@@ -27,6 +27,53 @@ export default function VRMViewer({
   onAnimationChange,
 }: VRMViewerProps) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [backgroundBlur, setBackgroundBlur] = useState(10);
+  const [currentBackgroundImage, setCurrentBackgroundImage] =
+    useState(backgroundImage);
+
+  // 배경 설정 로드 및 이벤트 리스너
+  useEffect(() => {
+    // 로컬 스토리지에서 설정 로드
+    const savedBlur = localStorage.getItem("backgroundBlur");
+    const savedBackground = localStorage.getItem("selectedBackground");
+
+    if (savedBlur) {
+      setBackgroundBlur(parseInt(savedBlur));
+    }
+    if (savedBackground) {
+      setCurrentBackgroundImage(savedBackground);
+    }
+
+    // 블러 변경 이벤트 리스너
+    const handleBlurChange = (event: CustomEvent) => {
+      setBackgroundBlur(event.detail.blur);
+    };
+
+    // 배경 이미지 변경 이벤트 리스너
+    const handleBackgroundImageChange = (event: CustomEvent) => {
+      setCurrentBackgroundImage(event.detail.backgroundImage);
+    };
+
+    window.addEventListener(
+      "backgroundBlurChange",
+      handleBlurChange as EventListener
+    );
+    window.addEventListener(
+      "backgroundImageChange",
+      handleBackgroundImageChange as EventListener
+    );
+
+    return () => {
+      window.removeEventListener(
+        "backgroundBlurChange",
+        handleBlurChange as EventListener
+      );
+      window.removeEventListener(
+        "backgroundImageChange",
+        handleBackgroundImageChange as EventListener
+      );
+    };
+  }, []);
 
   return (
     <div className={`w-full h-full relative ${className}`}>
@@ -38,14 +85,16 @@ export default function VRMViewer({
       )}
 
       {/* 배경 이미지 */}
-      {backgroundImage && (
+      {currentBackgroundImage && (
         <div
-          className="absolute inset-0 opacity-70"
+          className="absolute inset-0 opacity-70 transition-all duration-300"
           style={{
-            backgroundImage: `url(${backgroundImage})`,
+            backgroundImage: `url(${currentBackgroundImage})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
+            filter: `blur(${backgroundBlur}px)`,
+            transform: `scale(${1 + backgroundBlur / 100})`, // 블러시 약간 확대하여 가장자리 없애기
           }}
         />
       )}

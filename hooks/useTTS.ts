@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 interface TTSOptions {
   voice_id?: string;
@@ -23,9 +23,42 @@ export function useTTS({ onStart, onEnd, onError }: UseTTSProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [volume, setVolume] = useState(0.7); // 기본 볼륨 70%
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // 볼륨 설정 로드 및 이벤트 리스너
+  useEffect(() => {
+    // 로컬 스토리지에서 볼륨 설정 로드
+    const savedVolume = localStorage.getItem("ttsVolume");
+    if (savedVolume) {
+      setVolume(parseInt(savedVolume) / 100);
+    }
+
+    // 볼륨 변경 이벤트 리스너
+    const handleVolumeChange = (event: CustomEvent) => {
+      const newVolume = event.detail.volume;
+      setVolume(newVolume);
+
+      // 현재 재생 중인 오디오에 즉시 적용
+      if (audioRef.current) {
+        audioRef.current.volume = newVolume;
+      }
+    };
+
+    window.addEventListener(
+      "ttsVolumeChange",
+      handleVolumeChange as EventListener
+    );
+
+    return () => {
+      window.removeEventListener(
+        "ttsVolumeChange",
+        handleVolumeChange as EventListener
+      );
+    };
+  }, []);
 
   const speak = useCallback(
     async (text: string, options: TTSOptions = {}) => {
@@ -78,6 +111,7 @@ export function useTTS({ onStart, onEnd, onError }: UseTTSProps = {}) {
 
         // 오디오 엘리먼트 생성 및 재생
         const audio = new Audio(audioUrl);
+        audio.volume = volume; // 현재 설정된 볼륨 적용
         audioRef.current = audio;
 
         audio.onloadstart = () => {
@@ -121,7 +155,7 @@ export function useTTS({ onStart, onEnd, onError }: UseTTSProps = {}) {
         }
       }
     },
-    [onStart, onEnd, onError]
+    [onStart, onEnd, onError, volume]
   );
 
   const stop = useCallback(() => {

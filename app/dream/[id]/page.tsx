@@ -342,7 +342,13 @@ export default function DreamChatPage() {
         onAnimationChange={handleAnimationChange}
       />
 
-      <LeftCard isOpen={isLeftCardOpen} />
+      <LeftCard
+        isOpen={isLeftCardOpen}
+        character={character}
+        dream={dream}
+        autoTTS={autoTTS}
+        onAutoTTSToggle={() => setAutoTTS(!autoTTS)}
+      />
 
       <RightCard
         isOpen={isRightCardOpen}
@@ -359,7 +365,7 @@ export default function DreamChatPage() {
       />
 
       {/* 페이지 하단 중앙에 ChatInput 배치 */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-md z-10">
+      <div className="fixed bottom-0 md:bottom-6 left-1/2 -translate-x-1/2 w-full max-w-md z-10">
         <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-4 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] border border-white/20 before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/20 before:to-transparent before:rounded-3xl before:pointer-events-none relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-white/5 rounded-4xl"></div>
           <div className="relative z-10">

@@ -93,3 +93,19 @@ export async function getDreamsByUserId(userId: string): Promise<Dream[]> {
     return [];
   }
 }
+
+export async function deleteDream(dreamId: string): Promise<boolean> {
+  try {
+    const { error } = await supabase.from("dreams").delete().eq("id", dreamId);
+
+    if (error) {
+      console.error("Dream 삭제 에러:", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("deleteDream 에러:", error);
+    return false;
+  }
+}

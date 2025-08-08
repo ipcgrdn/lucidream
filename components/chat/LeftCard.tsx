@@ -1,10 +1,44 @@
 "use client";
 
+import { useState } from "react";
+import { Character } from "@/lib/characters";
+import { Dream } from "@/lib/dreams";
+
+import CharacterSection from "./sections/CharacterSection";
+import AudioSection from "./sections/AudioSection";
+import DreamSection from "./sections/DreamSection";
+
+export type LeftCardSection = "character" | "audio" | "dream";
+
 interface LeftCardProps {
   isOpen: boolean;
+  character?: Character;
+  dream?: Dream;
+  autoTTS?: boolean;
+  onAutoTTSToggle?: () => void;
 }
 
-export default function LeftCard({ isOpen }: LeftCardProps) {
+export default function LeftCard({
+  isOpen,
+  character,
+  dream,
+  autoTTS,
+  onAutoTTSToggle,
+}: LeftCardProps) {
+  const [activeSection, setActiveSection] = useState<LeftCardSection>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("leftCardActiveSection");
+      return (saved as LeftCardSection) || "character";
+    }
+    return "character";
+  });
+
+  // 활성 섹션 변경 핸들러
+  const handleSectionChange = (section: LeftCardSection) => {
+    setActiveSection(section);
+    localStorage.setItem("leftCardActiveSection", section);
+  };
+
   return (
     <div
       className={`
@@ -17,8 +51,107 @@ export default function LeftCard({ isOpen }: LeftCardProps) {
       before:backdrop-blur-xl
     `}
     >
-      <div className="relative h-full p-6 flex flex-col">
-        {/* Content will be added later */}
+      <div className="relative h-full p-4 flex flex-col">
+        {/* 섹션 네비게이션 */}
+        <div className="flex justify-center mb-6">
+          <div className="flex gap-2 bg-white/5 rounded-2xl p-1">
+            {/* 캐릭터 섹션 */}
+            <button
+              onClick={() => handleSectionChange("character")}
+              className={`
+                p-3 rounded-xl transition-all duration-300 
+                ${
+                  activeSection === "character"
+                    ? "bg-white/20 text-white shadow-lg"
+                    : "text-white/60 hover:text-white/80 hover:bg-white/10"
+                }
+              `}
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+            </button>
+
+            {/* 오디오 섹션 */}
+            <button
+              onClick={() => handleSectionChange("audio")}
+              className={`
+                p-3 rounded-xl transition-all duration-300 
+                ${
+                  activeSection === "audio"
+                    ? "bg-white/20 text-white shadow-lg"
+                    : "text-white/60 hover:text-white/80 hover:bg-white/10"
+                }
+              `}
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M9 12a3 3 0 106 0v-5a3 3 0 10-6 0v5z"
+                />
+              </svg>
+            </button>
+
+            {/* Dream 섹션 */}
+            <button
+              onClick={() => handleSectionChange("dream")}
+              className={`
+                p-3 rounded-xl transition-all duration-300 
+                ${
+                  activeSection === "dream"
+                    ? "bg-white/20 text-white shadow-lg"
+                    : "text-white/60 hover:text-white/80 hover:bg-white/10"
+                }
+              `}
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* 섹션 내용 */}
+        <div className="flex-1 overflow-hidden">
+          {activeSection === "character" && (
+            <CharacterSection character={character} />
+          )}
+
+          {activeSection === "audio" && (
+            <AudioSection autoTTS={autoTTS} onAutoTTSToggle={onAutoTTSToggle} />
+          )}
+
+          {activeSection === "dream" && (
+            <DreamSection dream={dream} character={character} />
+          )}
+        </div>
       </div>
     </div>
   );
