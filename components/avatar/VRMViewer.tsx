@@ -27,7 +27,7 @@ export default function VRMViewer({
   onAnimationChange,
 }: VRMViewerProps) {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [backgroundBlur, setBackgroundBlur] = useState(10);
+  const [backgroundBlur, setBackgroundBlur] = useState(0);
   const [currentBackgroundImage, setCurrentBackgroundImage] =
     useState(backgroundImage);
 

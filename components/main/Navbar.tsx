@@ -14,7 +14,7 @@ export default function Navbar() {
             height={40}
             priority
           />
-          <span className="text-white text-xl font-bold tracking-tight">
+          <span className="text-white text-xl tracking-tight font-bowlby-one-sc">
             lucidream
           </span>
         </div>
