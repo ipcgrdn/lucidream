@@ -7,12 +7,15 @@ import { VRM, VRMLoaderPlugin } from "@pixiv/three-vrm";
 import { VRMAnimationLoaderPlugin } from "@pixiv/three-vrm-animation";
 import { AnimationPresetType, getAnimationConfig } from "@/lib/vrm-animations";
 import { VRMAAnimationManager } from "@/lib/vrma-animation-manager";
+import { LipSyncManager } from "@/lib/lip-sync-manager";
 
 interface VRMModelProps {
   url: string;
   animationPreset?: AnimationPresetType;
   onAnimationChange?: (preset: AnimationPresetType) => void;
   onLoaded?: () => void;
+  audioElement?: HTMLAudioElement | null;
+  enableLipSync?: boolean;
 }
 
 export default function VRMModel({
@@ -20,11 +23,14 @@ export default function VRMModel({
   animationPreset = "idle",
   onAnimationChange,
   onLoaded,
+  audioElement,
+  enableLipSync = false,
 }: VRMModelProps) {
   const vrmRef = useRef<VRM | null>(null);
   const animationManagerRef = useRef<VRMAAnimationManager | null>(null);
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const currentAnimationRef = useRef<AnimationPresetType>("idle");
+  const lipSyncManagerRef = useRef<LipSyncManager | null>(null);
 
   // GLTFLoader에 VRM 및 VRMA 플러그인 등록
   const gltf = useLoader(GLTFLoader, url, (loader) => {
@@ -55,6 +61,11 @@ export default function VRMModel({
         animationManagerRef.current = new VRMAAnimationManager(vrm);
         // 초기 idle 애니메이션 시작 (비동기)
         animationManagerRef.current.playAnimation("idle", 0.5);
+      }
+
+      // 립싱크 매니저 초기화
+      if (enableLipSync && !lipSyncManagerRef.current) {
+        lipSyncManagerRef.current = new LipSyncManager(vrm);
       }
 
       // 로딩 완료 콜백 호출
@@ -101,6 +112,48 @@ export default function VRMModel({
     playNewAnimation();
   }, [animationPreset]);
 
+  // 오디오 엘리먼트와 립싱크 연동
+  useEffect(() => {
+    if (!enableLipSync || !lipSyncManagerRef.current) {
+      return;
+    }
+
+    if (audioElement) {
+      // 오디오가 이미 재생 중이면 즉시 립싱크 시작
+      if (!audioElement.paused) {
+        lipSyncManagerRef.current?.startLipSync(audioElement);
+      }
+
+      // 오디오 시작 시 립싱크 시작
+      const handlePlay = () => {
+        lipSyncManagerRef.current?.startLipSync(audioElement);
+      };
+
+      // 오디오 종료 시 립싱크 중단
+      const handleEnded = () => {
+        lipSyncManagerRef.current?.stopLipSync();
+      };
+
+      // 오디오 일시정지 시 립싱크 중단
+      const handlePause = () => {
+        lipSyncManagerRef.current?.stopLipSync();
+      };
+
+      audioElement.addEventListener("play", handlePlay);
+      audioElement.addEventListener("ended", handleEnded);
+      audioElement.addEventListener("pause", handlePause);
+
+      return () => {
+        audioElement.removeEventListener("play", handlePlay);
+        audioElement.removeEventListener("ended", handleEnded);
+        audioElement.removeEventListener("pause", handlePause);
+      };
+    } else {
+      // 오디오가 없으면 립싱크 중단
+      lipSyncManagerRef.current?.stopLipSync();
+    }
+  }, [audioElement, enableLipSync]);
+
   // 컴포넌트 언마운트 시 정리
   useEffect(() => {
     return () => {
@@ -109,6 +162,9 @@ export default function VRMModel({
       }
       if (animationManagerRef.current) {
         animationManagerRef.current.dispose();
+      }
+      if (lipSyncManagerRef.current) {
+        lipSyncManagerRef.current.stopLipSync();
       }
     };
   }, []);

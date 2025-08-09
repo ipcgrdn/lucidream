@@ -69,6 +69,9 @@ export default function DreamChatPage() {
     return true;
   });
   const [lastCompletedMessage, setLastCompletedMessage] = useState<string>("");
+  
+  // 립싱크를 위한 오디오 엘리먼트 상태
+  const [currentAudioElement, setCurrentAudioElement] = useState<HTMLAudioElement | null>(null);
 
   // 호감도 상태 관리
   const [currentAffectionPoints, setCurrentAffectionPoints] =
@@ -432,6 +435,8 @@ export default function DreamChatPage() {
         character={character}
         animationPreset={currentAnimation}
         onAnimationChange={handleAnimationChange}
+        audioElement={currentAudioElement}
+        enableLipSync={true}
       />
 
       <LeftCard
@@ -459,6 +464,7 @@ export default function DreamChatPage() {
         isLoading={isLoading}
         autoTTS={autoTTS}
         lastCompletedMessage={lastCompletedMessage}
+        onTTSAudioChange={setCurrentAudioElement}
       />
 
       {/* 페이지 하단 중앙에 ChatInput 배치 */}

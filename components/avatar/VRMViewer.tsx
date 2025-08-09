@@ -15,6 +15,8 @@ interface VRMViewerProps {
   backgroundImage?: string;
   animationPreset?: AnimationPresetType;
   onAnimationChange?: (preset: AnimationPresetType) => void;
+  audioElement?: HTMLAudioElement | null;
+  enableLipSync?: boolean;
 }
 
 export default function VRMViewer({
@@ -25,6 +27,8 @@ export default function VRMViewer({
   backgroundImage,
   animationPreset = "idle",
   onAnimationChange,
+  audioElement,
+  enableLipSync = false,
 }: VRMViewerProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [backgroundBlur, setBackgroundBlur] = useState(0);
@@ -129,6 +133,8 @@ export default function VRMViewer({
             animationPreset={animationPreset}
             onAnimationChange={onAnimationChange}
             onLoaded={() => setIsLoaded(true)}
+            audioElement={audioElement}
+            enableLipSync={enableLipSync}
           />
 
           {/* 환경 및 컨트롤 */}

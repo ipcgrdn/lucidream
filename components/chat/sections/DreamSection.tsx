@@ -24,15 +24,24 @@ export default function DreamSection({ dream, character }: DreamSectionProps) {
   // 컴포넌트 마운트 시 로컬 스토리지에서 설정값 불러오기
   useEffect(() => {
     const savedBackgroundBlur = localStorage.getItem("backgroundBlur");
-    const savedBackground = localStorage.getItem("selectedBackground");
 
     if (savedBackgroundBlur) {
       setBackgroundBlur(parseInt(savedBackgroundBlur));
     }
-    if (savedBackground) {
-      setSelectedBackground(savedBackground);
+
+    // dream별 배경 설정 불러오기
+    if (dream && character) {
+      const dreamBackgroundKey = `selectedBackground_${dream.id}`;
+      const savedBackground = localStorage.getItem(dreamBackgroundKey);
+
+      if (savedBackground) {
+        setSelectedBackground(savedBackground);
+      } else {
+        // 저장된 배경이 없으면 캐릭터 기본 배경 사용
+        setSelectedBackground(character.backgroundImage);
+      }
     }
-  }, []);
+  }, [dream, character]);
 
   // 배경 블러 변경 핸들러
   const handleBackgroundBlurChange = (value: number) => {
@@ -50,7 +59,13 @@ export default function DreamSection({ dream, character }: DreamSectionProps) {
   // 배경 선택 핸들러
   const handleBackgroundSelect = (backgroundPath: string) => {
     setSelectedBackground(backgroundPath);
-    localStorage.setItem("selectedBackground", backgroundPath);
+
+    // dream별로 배경 저장
+    if (dream) {
+      const dreamBackgroundKey = `selectedBackground_${dream.id}`;
+      localStorage.setItem(dreamBackgroundKey, backgroundPath);
+    }
+
     setShowBackgroundModal(false);
 
     // 전역 배경 변경 이벤트 디스패치

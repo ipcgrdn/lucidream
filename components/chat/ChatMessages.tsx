@@ -21,6 +21,7 @@ interface ChatMessagesProps {
   onAnimationTrigger?: (preset: AnimationPresetType) => void;
   autoTTS?: boolean;
   lastCompletedMessage?: string;
+  onTTSAudioChange?: (audioElement: HTMLAudioElement | null) => void;
 }
 
 export default function ChatMessages({
@@ -33,12 +34,26 @@ export default function ChatMessages({
   characterId,
   autoTTS = true,
   lastCompletedMessage,
+  onTTSAudioChange,
 }: ChatMessagesProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   // TTS 훅
-  const { speak, stop, isLoading: ttsLoading, isPlaying } = useTTS();
+  const {
+    speak,
+    stop,
+    isLoading: ttsLoading,
+    isPlaying,
+    audioElement,
+  } = useTTS({
+    onAudioElementChange: onTTSAudioChange,
+  });
+
+  // 오디오 엘리먼트 변경 시 상위 컴포넌트에 전달 (초기값)
+  useEffect(() => {
+    onTTSAudioChange?.(audioElement);
+  }, [audioElement, onTTSAudioChange]);
 
   // 새 메시지가 추가될 때 진행 중인 TTS 중단
   useEffect(() => {

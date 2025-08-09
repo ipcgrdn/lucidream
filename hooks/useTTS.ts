@@ -17,9 +17,10 @@ interface UseTTSProps {
   onStart?: () => void;
   onEnd?: () => void;
   onError?: (error: Error) => void;
+  onAudioElementChange?: (audioElement: HTMLAudioElement | null) => void;
 }
 
-export function useTTS({ onStart, onEnd, onError }: UseTTSProps = {}) {
+export function useTTS({ onStart, onEnd, onError, onAudioElementChange }: UseTTSProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +71,7 @@ export function useTTS({ onStart, onEnd, onError }: UseTTSProps = {}) {
         if (audioRef.current) {
           audioRef.current.pause();
           audioRef.current = null;
+          onAudioElementChange?.(null);
         }
 
         // 기존 요청 중단
@@ -113,6 +115,9 @@ export function useTTS({ onStart, onEnd, onError }: UseTTSProps = {}) {
         const audio = new Audio(audioUrl);
         audio.volume = volume; // 현재 설정된 볼륨 적용
         audioRef.current = audio;
+        
+        // 즉시 새로운 오디오 엘리먼트 알림
+        onAudioElementChange?.(audio);
 
         audio.onloadstart = () => {
           setIsLoading(false);
@@ -124,6 +129,7 @@ export function useTTS({ onStart, onEnd, onError }: UseTTSProps = {}) {
           setIsPlaying(false);
           URL.revokeObjectURL(audioUrl);
           audioRef.current = null;
+          onAudioElementChange?.(null);
           onEnd?.();
         };
 
@@ -135,6 +141,7 @@ export function useTTS({ onStart, onEnd, onError }: UseTTSProps = {}) {
           onError?.(error);
           URL.revokeObjectURL(audioUrl);
           audioRef.current = null;
+          onAudioElementChange?.(null);
         };
 
         await audio.play();
@@ -155,7 +162,7 @@ export function useTTS({ onStart, onEnd, onError }: UseTTSProps = {}) {
         }
       }
     },
-    [onStart, onEnd, onError, volume]
+    [onStart, onEnd, onError, onAudioElementChange, volume]
   );
 
   const stop = useCallback(() => {
@@ -170,11 +177,12 @@ export function useTTS({ onStart, onEnd, onError }: UseTTSProps = {}) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       audioRef.current = null;
+      onAudioElementChange?.(null);
     }
 
     setIsLoading(false);
     setIsPlaying(false);
-  }, []);
+  }, [onAudioElementChange]);
 
   const pause = useCallback(() => {
     if (audioRef.current && isPlaying) {
@@ -198,5 +206,6 @@ export function useTTS({ onStart, onEnd, onError }: UseTTSProps = {}) {
     isLoading,
     isPlaying,
     error,
+    audioElement: audioRef.current,
   };
 }

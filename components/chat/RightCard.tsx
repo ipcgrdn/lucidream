@@ -21,6 +21,7 @@ interface RightCardProps {
   isLoading: boolean;
   autoTTS: boolean;
   lastCompletedMessage: string;
+  onTTSAudioChange?: (audioElement: HTMLAudioElement | null) => void;
 }
 
 export default function RightCard({
@@ -35,8 +36,8 @@ export default function RightCard({
   isLoading,
   autoTTS,
   lastCompletedMessage,
+  onTTSAudioChange,
 }: RightCardProps) {
-
   return (
     <div
       className={`
@@ -61,6 +62,7 @@ export default function RightCard({
           onAnimationTrigger={onAnimationTrigger}
           autoTTS={autoTTS}
           lastCompletedMessage={lastCompletedMessage}
+          onTTSAudioChange={onTTSAudioChange}
         />
       </div>
     </div>
