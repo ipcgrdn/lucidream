@@ -488,7 +488,6 @@ export default function DreamChatPage() {
           isVisible={isLevelUpVisible}
           previousLevel={previousLevel}
           newLevel={newLevel}
-          characterName={character?.name}
           onComplete={handleLevelUpComplete}
         />
       )}

@@ -52,7 +52,8 @@ export class LipSyncManager {
       const startLipSyncWhenReady = () => {
         // AudioContext 생성
         this.audioContext = new (window.AudioContext ||
-          (window as any).webkitAudioContext)();
+          (window as unknown as { webkitAudioContext?: typeof AudioContext })
+            .webkitAudioContext)();
 
         // MediaElementSource 생성
         const source = this.audioContext.createMediaElementSource(audioElement);
@@ -228,7 +229,7 @@ export class LipSyncManager {
       // VRM expression에 적용
       try {
         expressionManager?.setValue(key, smoothed);
-      } catch (error) {
+      } catch {
         // expression이 존재하지 않는 경우 무시
       }
 
@@ -246,7 +247,7 @@ export class LipSyncManager {
     Object.keys(this.currentMouthShapes).forEach((key) => {
       try {
         expressionManager?.setValue(key, 0);
-      } catch (error) {
+      } catch {
         // expression이 존재하지 않는 경우 무시
       }
     });

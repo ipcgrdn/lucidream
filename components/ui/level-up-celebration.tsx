@@ -8,7 +8,6 @@ interface LevelUpCelebrationProps {
   isVisible: boolean;
   previousLevel: AffectionLevel;
   newLevel: AffectionLevel;
-  characterName?: string;
   onComplete: () => void;
 }
 
@@ -16,7 +15,6 @@ export default function LevelUpCelebration({
   isVisible,
   previousLevel,
   newLevel,
-  characterName = "Character",
   onComplete,
 }: LevelUpCelebrationProps) {
   const [stage, setStage] = useState<"fadeIn" | "celebrate" | "fadeOut">(
