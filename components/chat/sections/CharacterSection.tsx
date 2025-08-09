@@ -40,7 +40,7 @@ export default function CharacterSection({
       </div>
 
       {/* 호감도 바 */}
-      <AffectionBar points={affectionPoints || 50} animate={true} />
+      <AffectionBar points={affectionPoints} animate={true} />
 
       {/* 성격 정보 */}
       <div className="bg-white/5 rounded-2xl p-4">
