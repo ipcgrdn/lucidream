@@ -107,6 +107,8 @@ export default function ChatMessages({
         jessica: "54Cze5LrTSyLgbO6Fhlc", // Adam - 밝고 활발한 톤
         reina: "vGQNBgLaiM3EdZtxIiuY", // Rachel - 차분하고 우아한 톤
         sia: "kdmDKE6EkgrWrrykO9Qt", // Domi - 신비롭고 매력적인 톤
+        ren: "kdmDKE6EkgrWrrykO9Qt", // Ren -
+        hiyori: "vGQNBgLaiM3EdZtxIiuY", // Hiyori -
       };
 
       const voice_id = characterId ? voiceMap[characterId] : undefined;
@@ -139,6 +141,8 @@ export default function ChatMessages({
             jessica: "54Cze5LrTSyLgbO6Fhlc",
             reina: "vGQNBgLaiM3EdZtxIiuY",
             sia: "kdmDKE6EkgrWrrykO9Qt",
+            ren: "kdmDKE6EkgrWrrykO9Qt",
+            hiyori: "vGQNBgLaiM3EdZtxIiuY",
           };
 
           const voice_id = characterId ? voiceMap[characterId] : undefined;

@@ -18,14 +18,7 @@ const characterData = [
     description: char.description,
     button: `Meet ${char.name}`,
     src: char.previewImage,
-  })),
-  {
-    id: "create",
-    title: "+",
-    description: "",
-    button: "Create New Avatar",
-    src: "create",
-  },
+  }))
 ];
 
 export default function Dream() {
