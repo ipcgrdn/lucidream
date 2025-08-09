@@ -63,8 +63,6 @@ Available animation presets (ONLY use these exact names):
 - milking: Milking motion. It is a kind of reaction
 - no: Refusing gesture
 - piano: Playing piano motion
-- pose: Striking a pose
-- pose2: Alternative pose gesture
 - reject: Rejecting gesture
 - talking: Animated talking gesture
 - threatening: Threatening pose
@@ -73,7 +71,7 @@ Available animation presets (ONLY use these exact names):
 
 STRICT ANIMATION RULES:
 1. Place [ANIMATION:preset_name] at the very beginning of your response
-2. You MUST use ONLY the 32 preset names listed above - NO OTHER NAMES ALLOWED
+2. You MUST use ONLY the 30 preset names listed above - NO OTHER NAMES ALLOWED
 3. Do NOT create new animation names not in the list
 4. If unsure, default to the closest available preset or use "idle"
 
@@ -90,7 +88,7 @@ INVALID examples (DO NOT USE):
 [ANIMATION:laughing] ← WRONG! Use "cheer" or "happy" instead  
 [ANIMATION:angry] ← WRONG! Use "disappointed" or "threatening" instead
 
-CRITICAL: Every response must start with [ANIMATION:preset_name] using ONLY the 32 valid preset names.`;
+CRITICAL: Every response must start with [ANIMATION:preset_name] using ONLY the 30 valid preset names.`;
 
     let systemPrompt = baseSystemPrompt;
 

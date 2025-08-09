@@ -7,9 +7,11 @@ import { Dream } from "@/lib/dreams";
 import CharacterSection from "./sections/CharacterSection";
 import AudioSection from "./sections/AudioSection";
 import DreamSection from "./sections/DreamSection";
-import { Flower, Headphones, UserRound } from "lucide-react";
+import AnimationSection from "./sections/AnimationSection";
+import { Flower, Headphones, UserRound, PlayCircle } from "lucide-react";
+import { AnimationPresetType } from "@/lib/vrm-animations";
 
-export type LeftCardSection = "character" | "audio" | "dream";
+export type LeftCardSection = "character" | "audio" | "dream" | "animation";
 
 interface LeftCardProps {
   isOpen: boolean;
@@ -18,6 +20,7 @@ interface LeftCardProps {
   affectionPoints?: number;
   autoTTS?: boolean;
   onAutoTTSToggle?: () => void;
+  onAnimationPlay?: (presetType: AnimationPresetType) => void;
 }
 
 export default function LeftCard({
@@ -27,6 +30,7 @@ export default function LeftCard({
   affectionPoints,
   autoTTS,
   onAutoTTSToggle,
+  onAnimationPlay,
 }: LeftCardProps) {
   const [activeSection, setActiveSection] = useState<LeftCardSection>(() => {
     if (typeof window !== "undefined") {
@@ -88,6 +92,21 @@ export default function LeftCard({
               <Headphones className="w-5 h-5" />
             </button>
 
+            {/* Animation 섹션 */}
+            <button
+              onClick={() => handleSectionChange("animation")}
+              className={`
+                p-3 rounded-xl transition-all duration-300 
+                ${
+                  activeSection === "animation"
+                    ? "bg-white/20 text-white shadow-lg"
+                    : "text-white/60 hover:text-white/80 hover:bg-white/10"
+                }
+              `}
+            >
+              <PlayCircle className="w-5 h-5" />
+            </button>
+
             {/* Dream 섹션 */}
             <button
               onClick={() => handleSectionChange("dream")}
@@ -120,6 +139,10 @@ export default function LeftCard({
 
           {activeSection === "dream" && (
             <DreamSection dream={dream} character={character} />
+          )}
+
+          {activeSection === "animation" && (
+            <AnimationSection onAnimationPlay={onAnimationPlay} />
           )}
         </div>
       </div>

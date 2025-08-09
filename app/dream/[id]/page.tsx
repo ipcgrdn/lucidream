@@ -69,9 +69,10 @@ export default function DreamChatPage() {
     return true;
   });
   const [lastCompletedMessage, setLastCompletedMessage] = useState<string>("");
-  
+
   // 립싱크를 위한 오디오 엘리먼트 상태
-  const [currentAudioElement, setCurrentAudioElement] = useState<HTMLAudioElement | null>(null);
+  const [currentAudioElement, setCurrentAudioElement] =
+    useState<HTMLAudioElement | null>(null);
 
   // 호감도 상태 관리
   const [currentAffectionPoints, setCurrentAffectionPoints] =
@@ -450,6 +451,7 @@ export default function DreamChatPage() {
           setAutoTTS(newAutoTTS);
           localStorage.setItem("autoTTS", JSON.stringify(newAutoTTS));
         }}
+        onAnimationPlay={handleAnimationChange}
       />
 
       <RightCard

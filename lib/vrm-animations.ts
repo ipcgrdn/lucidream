@@ -24,8 +24,6 @@ export type AnimationPresetType =
   | "milking"
   | "no"
   | "piano"
-  | "pose"
-  | "pose2"
   | "reject"
   | "talking"
   | "threatening"
@@ -193,18 +191,6 @@ export const ANIMATION_CONFIGS: Record<
     duration: 4.0,
     loop: false,
     description: "피아노 치는 동작",
-  },
-  pose: {
-    name: "pose",
-    duration: 3.0,
-    loop: false,
-    description: "포즈를 취하는 동작",
-  },
-  pose2: {
-    name: "pose2",
-    duration: 3.0,
-    loop: false,
-    description: "다른 포즈를 취하는 동작",
   },
   reject: {
     name: "reject",
