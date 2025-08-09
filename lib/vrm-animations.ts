@@ -4,7 +4,33 @@ export type AnimationPresetType =
   | "sad"
   | "surprised"
   | "thinking"
-  | "greeting";
+  | "greeting"
+  | "blow_kiss"
+  | "cheer"
+  | "clap"
+  | "crazy"
+  | "dance"
+  | "dance_hard"
+  | "disappointed"
+  | "dismiss"
+  | "fighting"
+  | "flying"
+  | "jogging"
+  | "jump"
+  | "jump_around"
+  | "kick"
+  | "kiss"
+  | "lookling"
+  | "milking"
+  | "no"
+  | "piano"
+  | "pose"
+  | "pose2"
+  | "reject"
+  | "talking"
+  | "threatening"
+  | "tired"
+  | "tired_walk";
 
 export interface AnimationClipConfig {
   name: AnimationPresetType;
@@ -53,6 +79,162 @@ export const ANIMATION_CONFIGS: Record<
     duration: 2.0,
     loop: false,
     description: "반갑게 인사하는 동작",
+  },
+  blow_kiss: {
+    name: "blow_kiss",
+    duration: 2.5,
+    loop: false,
+    description: "손키스를 보내는 동작",
+  },
+  cheer: {
+    name: "cheer",
+    duration: 3.0,
+    loop: false,
+    description: "환호하는 동작",
+  },
+  clap: {
+    name: "clap",
+    duration: 2.0,
+    loop: false,
+    description: "박수치는 동작",
+  },
+  crazy: {
+    name: "crazy",
+    duration: 3.5,
+    loop: false,
+    description: "미쳤냐고 하는 표정과 동작",
+  },
+  dance: {
+    name: "dance",
+    duration: 4.0,
+    loop: false,
+    description: "춤추는 동작",
+  },
+  dance_hard: {
+    name: "dance_hard",
+    duration: 4.5,
+    loop: false,
+    description: "격렬하게 춤추는 동작",
+  },
+  disappointed: {
+    name: "disappointed",
+    duration: 3.0,
+    loop: false,
+    description: "실망하는 표정과 동작",
+  },
+  dismiss: {
+    name: "dismiss",
+    duration: 2.0,
+    loop: false,
+    description: "무시하거나 거절하는 동작",
+  },
+  fighting: {
+    name: "fighting",
+    duration: 2.5,
+    loop: false,
+    description: "싸우는 동작",
+  },
+  flying: {
+    name: "flying",
+    duration: 4.0,
+    loop: true,
+    description: "날아가는 동작",
+  },
+  jogging: {
+    name: "jogging",
+    duration: 3.0,
+    loop: true,
+    description: "조깅하는 동작",
+  },
+  jump: {
+    name: "jump",
+    duration: 1.5,
+    loop: false,
+    description: "점프하는 동작",
+  },
+  jump_around: {
+    name: "jump_around",
+    duration: 3.0,
+    loop: false,
+    description: "한 바퀴 도는 동작",
+  },
+  kick: {
+    name: "kick",
+    duration: 1.8,
+    loop: false,
+    description: "발차기 동작",
+  },
+  kiss: {
+    name: "kiss",
+    duration: 2.5,
+    loop: false,
+    description: "키스하는 동작",
+  },
+  lookling: {
+    name: "lookling",
+    duration: 3.0,
+    loop: true,
+    description: "주변을 둘러보는 동작",
+  },
+  milking: {
+    name: "milking",
+    duration: 3.5,
+    loop: false,
+    description: "우유 짜는 동작",
+  },
+  no: {
+    name: "no",
+    duration: 2.0,
+    loop: false,
+    description: "거절하는 동작",
+  },
+  piano: {
+    name: "piano",
+    duration: 4.0,
+    loop: false,
+    description: "피아노 치는 동작",
+  },
+  pose: {
+    name: "pose",
+    duration: 3.0,
+    loop: false,
+    description: "포즈를 취하는 동작",
+  },
+  pose2: {
+    name: "pose2",
+    duration: 3.0,
+    loop: false,
+    description: "다른 포즈를 취하는 동작",
+  },
+  reject: {
+    name: "reject",
+    duration: 2.5,
+    loop: false,
+    description: "거부하는 동작",
+  },
+  talking: {
+    name: "talking",
+    duration: 4.0,
+    loop: true,
+    description: "말하는 동작",
+  },
+  threatening: {
+    name: "threatening",
+    duration: 2.8,
+    loop: false,
+    description: "위협하는 동작",
+  },
+  tired: {
+    name: "tired",
+    duration: 3.5,
+    loop: false,
+    description: "피곤한 표정과 동작",
+  },
+  tired_walk: {
+    name: "tired_walk",
+    duration: 4.0,
+    loop: true,
+    description: "피곤하게 걷는 동작",
   },
 };
 

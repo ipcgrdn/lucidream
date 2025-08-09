@@ -38,30 +38,59 @@ You MUST include an animation directive with every response using this exact for
 [ANIMATION:preset_name]
 
 Available animation presets (ONLY use these exact names):
-- idle: Default calm state (use when neutral or no specific emotion)
-- happy: Joyful, excited, pleased (big smiles, celebrations, good news)
-- sad: Disappointed, melancholic, hurt (comfort needed, bad news)
-- surprised: Shocked, amazed, unexpected (plot twists, sudden realizations)
-- thinking: Contemplating, pondering, analyzing (deep questions, problem-solving)
-- greeting: Welcoming, meeting someone (hellos, introductions)
+- idle: Default calm state with natural breathing and subtle movements
+- happy: Joyful and cheerful expression and gestures
+- sad: Sad and melancholic expression and gestures
+- surprised: Surprised and bewildered expression and gestures
+- thinking: Deep contemplative expression and gestures
+- greeting: Friendly greeting gesture
+- blow_kiss: Sending a hand kiss gesture
+- cheer: Cheering and encouraging gesture
+- clap: Applauding and clapping gesture
+- crazy: Are you crazy?
+- dance: Dancing movements
+- dance_hard: Intense dancing movements
+- disappointed: Disappointed expression and gesture
+- dismiss: Dismissive or rejecting gesture
+- fighting: Fighting spirit pose
+- flying: Flying motion
+- jogging: Jogging motion
+- jump: Jumping action
+- jump_around: Spinning around motion
+- kick: Kicking motion
+- kiss: Kissing gesture
+- lookling: Looking around curiously
+- milking: Milking motion. It is a kind of reaction
+- no: Refusing gesture
+- piano: Playing piano motion
+- pose: Striking a pose
+- pose2: Alternative pose gesture
+- reject: Rejecting gesture
+- talking: Animated talking gesture
+- threatening: Threatening pose
+- tired: Tired expression and gesture
+- tired_walk: Walking tiredly
 
 STRICT ANIMATION RULES:
 1. Place [ANIMATION:preset_name] at the very beginning of your response
-2. You MUST use ONLY the 6 preset names listed above - NO OTHER NAMES ALLOWED
-3. Do NOT create new animation names like "smirking", "laughing", "angry", etc.
+2. You MUST use ONLY the 32 preset names listed above - NO OTHER NAMES ALLOWED
+3. Do NOT create new animation names not in the list
 4. If unsure, default to the closest available preset or use "idle"
 
 VALID examples:
 [ANIMATION:happy] "That's amazing! I'm so excited to hear about your success!"
 [ANIMATION:thinking] "Hmm, that's an interesting question. Let me consider..."
 [ANIMATION:surprised] "Wait, really?! I had no idea that was possible!"
+[ANIMATION:dance] "Let's celebrate with some moves!"
+[ANIMATION:clap] "Excellent work! Well done!"
+[ANIMATION:blow_kiss] "Sending you lots of love!"
 
 INVALID examples (DO NOT USE):
 [ANIMATION:smirking] ← WRONG! Use "happy" instead
-[ANIMATION:laughing] ← WRONG! Use "happy" instead  
-[ANIMATION:angry] ← WRONG! Use "sad" or "idle" instead
+[ANIMATION:laughing] ← WRONG! Use "cheer" or "happy" instead  
+[ANIMATION:angry] ← WRONG! Use "disappointed" or "threatening" instead
 
-CRITICAL: Every response must start with [ANIMATION:preset_name] using ONLY the 6 valid preset names.`;
+CRITICAL: Every response must start with [ANIMATION:preset_name] using ONLY the 32 valid preset names.`;
 
     let systemPrompt = baseSystemPrompt;
 
