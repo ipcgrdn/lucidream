@@ -122,7 +122,13 @@ CRITICAL: Every response must start with [ANIMATION:preset_name] using ONLY the 
 
     const completion = await openai.chat.completions.create({
       model: "gpt-5-mini",
-      messages: messagesWithSystem,
+      messages: messagesWithSystem.map((msg, index) => ({
+        ...msg,
+        // 시스템 프롬프트에 캐시 힌트 추가
+        ...(index === 0 && msg.role === "system"
+          ? { cache_control: { type: "ephemeral" } }
+          : {}),
+      })),
       max_completion_tokens: 1000,
       stream: true,
     });
