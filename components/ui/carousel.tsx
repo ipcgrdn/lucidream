@@ -167,7 +167,7 @@ const Slide = ({
           <h2 className="text-lg md:text-2xl lg:text-4xl font-semibold  relative">
             {title}
           </h2>
-          <p className="text-md mt-2">{description}</p>
+          <p className="text-xs md:text-base mt-2">{description}</p>
           <div className="flex justify-center">
             <ChatButton slide={slide} userId={userId} />
           </div>
