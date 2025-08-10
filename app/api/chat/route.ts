@@ -100,7 +100,7 @@ CRITICAL: Every response must start with [ANIMATION:preset_name] using ONLY the 
         currentAffectionPoints
       );
       const characterToneModifier =
-        AffectionSystem.getCharacterResponseModifier(currentLevel);
+        AffectionSystem.getCharacterResponseModifier(currentLevel, characterId);
 
       systemPrompt += `\n\n${affectionAnalysisPrompt}\n\n=== CURRENT RELATIONSHIP STATUS ===\nCurrent Affection Level: ${currentLevel.name} (${currentAffectionPoints} points)\nResponse Tone Adjustment: ${characterToneModifier}`;
     }
@@ -121,10 +121,9 @@ CRITICAL: Every response must start with [ANIMATION:preset_name] using ONLY the 
     ];
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4.1-mini",
+      model: "gpt-5-mini",
       messages: messagesWithSystem,
-      max_tokens: 1000,
-      temperature: 0.7,
+      max_completion_tokens: 1000,
       stream: true,
     });
 
