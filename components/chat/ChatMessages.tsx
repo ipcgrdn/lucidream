@@ -48,6 +48,7 @@ export default function ChatMessages({
     audioElement,
   } = useTTS({
     onAudioElementChange: onTTSAudioChange,
+    characterId,
   });
 
   // 오디오 엘리먼트 변경 시 상위 컴포넌트에 전달 (초기값)
@@ -99,25 +100,14 @@ export default function ChatMessages({
     return () => container.removeEventListener("scroll", handleScroll);
   }, [hasMoreMessages, loadingMoreMessages, onLoadMore]);
 
-  // TTS 재생 함수
+  // TTS 재생 함수 (사용자가 선택한 음성 사용)
   const handleSpeak = useCallback(
     (text: string) => {
-      // 캐릭터별 음성 ID 매핑 (한국어 지원 음성들)
-      const voiceMap: Record<string, string> = {
-        jessica: "54Cze5LrTSyLgbO6Fhlc", // Adam - 밝고 활발한 톤
-        reina: "vGQNBgLaiM3EdZtxIiuY", // Rachel - 차분하고 우아한 톤
-        sia: "kdmDKE6EkgrWrrykO9Qt", // Domi - 신비롭고 매력적인 톤
-        ren: "kdmDKE6EkgrWrrykO9Qt", // Ren -
-        hiyori: "vGQNBgLaiM3EdZtxIiuY", // Hiyori -
-      };
-
-      const voice_id = characterId ? voiceMap[characterId] : undefined;
       speak(text, {
-        voice_id,
         model_id: "eleven_multilingual_v2", // 한국어 지원 모델
       });
     },
-    [characterId, speak]
+    [speak]
   );
 
   // 자동 TTS 재생
@@ -137,17 +127,7 @@ export default function ChatMessages({
 
         // 짧은 딜레이 후 자동 재생
         const timer = setTimeout(() => {
-          const voiceMap: Record<string, string> = {
-            jessica: "54Cze5LrTSyLgbO6Fhlc",
-            reina: "vGQNBgLaiM3EdZtxIiuY",
-            sia: "kdmDKE6EkgrWrrykO9Qt",
-            ren: "kdmDKE6EkgrWrrykO9Qt",
-            hiyori: "vGQNBgLaiM3EdZtxIiuY",
-          };
-
-          const voice_id = characterId ? voiceMap[characterId] : undefined;
           speak(lastCompletedMessage, {
-            voice_id,
             model_id: "eleven_multilingual_v2",
           });
         }, 500);
@@ -155,7 +135,15 @@ export default function ChatMessages({
         return () => clearTimeout(timer);
       }
     }
-  }, [lastCompletedMessage, autoTTS, messages]);
+  }, [
+    lastCompletedMessage,
+    autoTTS,
+    messages,
+    speak,
+    isPlaying,
+    ttsLoading,
+    stop,
+  ]);
 
   if (messagesLoading) {
     return (

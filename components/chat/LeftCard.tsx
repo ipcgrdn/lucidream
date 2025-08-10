@@ -129,7 +129,11 @@ export default function LeftCard({
           )}
 
           {activeSection === "audio" && (
-            <AudioSection autoTTS={autoTTS} onAutoTTSToggle={onAutoTTSToggle} />
+            <AudioSection
+              autoTTS={autoTTS}
+              onAutoTTSToggle={onAutoTTSToggle}
+              characterId={character?.id}
+            />
           )}
 
           {activeSection === "dream" && (

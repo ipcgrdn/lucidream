@@ -20,15 +20,8 @@ const DEFAULT_VOICE_SETTINGS = {
   use_speaker_boost: true,
 };
 
-// 캐릭터별 음성 ID 매핑 (한국어 지원 음성들)
-const CHARACTER_VOICES = {
-  jessica: "54Cze5LrTSyLgbO6Fhlc",
-  reina: "vGQNBgLaiM3EdZtxIiuY",
-  sia: "kdmDKE6EkgrWrrykO9Qt",
-  ren: "kdmDKE6EkgrWrrykO9Qt",
-  hiyori: "vGQNBgLaiM3EdZtxIiuY",
-  default: "kdmDKE6EkgrWrrykO9Qt",
-};
+// 기본 음성 ID (fallback용)
+const DEFAULT_VOICE_ID = "kdmDKE6EkgrWrrykO9Qt";
 
 export async function POST(request: NextRequest) {
   try {
@@ -60,8 +53,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 기본 음성 ID 사용
-    const finalVoiceId = voice_id || CHARACTER_VOICES.default;
+    // 전달된 voice_id 사용, 없으면 기본 음성 사용
+    const finalVoiceId = voice_id || DEFAULT_VOICE_ID;
     const finalVoiceSettings = { ...DEFAULT_VOICE_SETTINGS, ...voice_settings };
 
     // ElevenLabs API 호출
