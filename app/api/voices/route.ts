@@ -1,5 +1,12 @@
 import { NextResponse } from "next/server";
 
+interface VerificationAttempt {
+  attempt_id: string;
+  text: string;
+  accepted: boolean;
+  created_at: string;
+}
+
 interface Voice {
   voice_id: string;
   name: string;
@@ -18,7 +25,7 @@ interface Voice {
     is_allowed_to_fine_tune: boolean;
     finetuning_requested: boolean;
     finetuning_state: string;
-    verification_attempts: any[] | null;
+    verification_attempts: VerificationAttempt[] | null;
     verification_failures: string[];
     verification_attempts_count: number;
     slice_ids: string[] | null;
@@ -58,7 +65,7 @@ interface Voice {
     verification_failures: string[];
     verification_attempts_count: number;
     language: string | null;
-    verification_attempts: any[] | null;
+    verification_attempts: VerificationAttempt[] | null;
   };
   owner_id: string | null;
   permission_on_resource: string | null;
