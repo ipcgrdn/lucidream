@@ -10,7 +10,7 @@ interface AffectionBarProps {
 }
 
 export default function AffectionBar({
-  points = 50,
+  points = 0,
   animate = true,
   onPointsChange,
 }: AffectionBarProps) {
@@ -54,17 +54,17 @@ export default function AffectionBar({
   const progress = AffectionSystem.getProgressToNextLevel(displayPoints);
 
   return (
-    <div className="bg-gradient-to-br from-pink-500/10 via-purple-500/5 to-blue-500/10 rounded-3xl p-5 border border-pink-300/20 shadow-lg backdrop-blur-sm">
+    <div className="bg-white/10 rounded-3xl p-5 border border-white/20 shadow-lg backdrop-blur-sm">
       {/* Header with sparkles */}
       <div className="flex items-center justify-center mb-4">
-        <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full border border-pink-300/30">
+        <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full border border-white/20">
           <h3 className="text-white font-bold text-sm tracking-wide">STATUS</h3>
         </div>
       </div>
 
       {/* Level Display with Character Card Style */}
       <div className="relative mb-5">
-        <div className="bg-gradient-to-r from-white/5 to-white/10 rounded-2xl p-4 border border-white/20">
+        <div className="bg-gradient-to-r from-white/20 to-white/10 rounded-2xl p-4 border border-white/20">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-3">
               <div className="relative">
@@ -114,13 +114,11 @@ export default function AffectionBar({
       {/* Progress Section with Gaming Style */}
       {currentLevel.level < 6 ? (
         <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-white/70 uppercase tracking-wider font-semibold">
+          <div className="flex justify-between items-center text-white/70">
+            <span className="text-xs uppercase tracking-wider font-semibold">
               Next Level: {AFFECTION_LEVELS[currentLevel.level + 1]?.name}
             </span>
-            <span className="text-xs text-white/70">
-              {Math.round(progress.current)}%
-            </span>
+            <span className="text-xs">{Math.round(progress.current)}%</span>
           </div>
 
           {/* Progress Bar with Gaming Style */}

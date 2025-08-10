@@ -76,7 +76,7 @@ export default function DreamChatPage() {
 
   // 호감도 상태 관리
   const [currentAffectionPoints, setCurrentAffectionPoints] =
-    useState<number>(50);
+    useState<number>(0);
 
   // 레벨업 축하 상태
   const [isLevelUpVisible, setIsLevelUpVisible] = useState(false);
@@ -430,6 +430,7 @@ export default function DreamChatPage() {
           alert("Profile");
         }}
         userAvatarUrl={user?.user_metadata?.avatar_url}
+        affectionPoints={currentAffectionPoints}
       />
 
       <ChatBackground
@@ -444,7 +445,6 @@ export default function DreamChatPage() {
         isOpen={isLeftCardOpen}
         character={character}
         dream={dream}
-        affectionPoints={currentAffectionPoints}
         autoTTS={autoTTS}
         onAutoTTSToggle={() => {
           const newAutoTTS = !autoTTS;

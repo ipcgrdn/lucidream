@@ -17,7 +17,6 @@ interface LeftCardProps {
   isOpen: boolean;
   character?: Character;
   dream?: Dream;
-  affectionPoints?: number;
   autoTTS?: boolean;
   onAutoTTSToggle?: () => void;
   onAnimationPlay?: (presetType: AnimationPresetType) => void;
@@ -27,7 +26,6 @@ export default function LeftCard({
   isOpen,
   character,
   dream,
-  affectionPoints,
   autoTTS,
   onAutoTTSToggle,
   onAnimationPlay,
@@ -127,10 +125,7 @@ export default function LeftCard({
         {/* 섹션 내용 */}
         <div className="flex-1 overflow-hidden">
           {activeSection === "character" && (
-            <CharacterSection
-              character={character}
-              affectionPoints={affectionPoints}
-            />
+            <CharacterSection character={character} />
           )}
 
           {activeSection === "audio" && (

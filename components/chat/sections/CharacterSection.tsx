@@ -2,18 +2,13 @@
 
 import { LoaderTwo } from "@/components/ui/loader";
 import { Character } from "@/lib/characters";
-import AffectionBar from "@/components/ui/affection-bar";
 import Image from "next/image";
 
 interface CharacterSectionProps {
   character?: Character;
-  affectionPoints?: number;
 }
 
-export default function CharacterSection({
-  character,
-  affectionPoints,
-}: CharacterSectionProps) {
+export default function CharacterSection({ character }: CharacterSectionProps) {
   if (!character) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -38,9 +33,6 @@ export default function CharacterSection({
         <h2 className="text-xl font-bold text-white mb-2">{character.name}</h2>
         <p className="text-white/70 text-sm">{character.description}</p>
       </div>
-
-      {/* 호감도 바 */}
-      <AffectionBar points={affectionPoints} animate={true} />
 
       {/* 성격 정보 */}
       <div className="bg-white/5 rounded-2xl p-4">
