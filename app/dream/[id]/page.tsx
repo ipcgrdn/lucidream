@@ -20,6 +20,7 @@ import { detectAnimationInStream } from "@/lib/animation-parser";
 import { detectAffectionInStream } from "@/lib/affection-parser";
 import { AffectionSystem, AffectionLevel } from "@/lib/affection";
 import LevelUpCelebration from "@/components/ui/level-up-celebration";
+import AffectionEffect from "@/components/ui/affection-effect";
 
 export default function DreamChatPage() {
   const { user, loading } = useAuth();
@@ -86,6 +87,11 @@ export default function DreamChatPage() {
   );
   const [newLevel, setNewLevel] = useState<AffectionLevel | null>(null);
 
+  // 호감도 변화 효과 상태
+  const [isAffectionEffectVisible, setIsAffectionEffectVisible] =
+    useState(false);
+  const [currentAffectionChange, setCurrentAffectionChange] = useState(0);
+
   // 애니메이션 변경 핸들러
   const handleAnimationChange = useCallback((preset: AnimationPresetType) => {
     setCurrentAnimation(preset);
@@ -96,6 +102,12 @@ export default function DreamChatPage() {
     setIsLevelUpVisible(false);
     setPreviousLevel(null);
     setNewLevel(null);
+  }, []);
+
+  // 호감도 변화 효과 완료 핸들러
+  const handleAffectionEffectComplete = useCallback(() => {
+    setIsAffectionEffectVisible(false);
+    setCurrentAffectionChange(0);
   }, []);
 
   useEffect(() => {
@@ -361,6 +373,10 @@ export default function DreamChatPage() {
                         setPreviousLevel(oldLevel);
                         setNewLevel(currentNewLevel);
                         setIsLevelUpVisible(true);
+                      } else {
+                        // 레벨업이 아닌 경우 호감도 변화 효과 트리거
+                        setCurrentAffectionChange(detectedAffectionChange);
+                        setIsAffectionEffectVisible(true);
                       }
 
                       setCurrentAffectionPoints(newAffectionPoints);
@@ -499,6 +515,13 @@ export default function DreamChatPage() {
           onComplete={handleLevelUpComplete}
         />
       )}
+
+      {/* Affection Change Effect */}
+      <AffectionEffect
+        isVisible={isAffectionEffectVisible}
+        affectionChange={currentAffectionChange}
+        onComplete={handleAffectionEffectComplete}
+      />
     </div>
   );
 }
