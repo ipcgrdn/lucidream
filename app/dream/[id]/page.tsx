@@ -5,7 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 
 import { useAuth } from "@/contexts/Authcontext";
 import { getDreamById, Dream } from "@/lib/dreams";
-import { getCharacterById, Character } from "@/lib/characters";
+import { Character } from "@/lib/characters";
+import { getCharacterByIdUnified } from "@/lib/custom_character";
 import { AnimationPresetType } from "@/lib/vrm-animations";
 
 import ChatNavbar from "@/components/chat/ChatNavbar";
@@ -124,7 +125,10 @@ export default function DreamChatPage() {
           return;
         }
 
-        const characterData = getCharacterById(dreamData.character_id);
+        const characterData = await getCharacterByIdUnified(
+          dreamData.character_id,
+          user.id
+        );
 
         if (!characterData) {
           console.error("캐릭터를 찾을 수 없습니다");
@@ -229,6 +233,7 @@ export default function DreamChatPage() {
             role: msg.role,
             content: msg.content,
           })),
+          userId: user?.id,
           characterId: character.id,
           currentAffectionPoints: currentAffectionPoints,
         }),
@@ -435,6 +440,7 @@ export default function DreamChatPage() {
 
       <ChatBackground
         character={character}
+        dream={dream}
         animationPreset={currentAnimation}
         onAnimationChange={handleAnimationChange}
         audioElement={currentAudioElement}

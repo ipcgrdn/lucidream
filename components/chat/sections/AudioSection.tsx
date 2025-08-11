@@ -302,7 +302,7 @@ export default function AudioSection({
 
         {/* Voice Grid (Default Voice 포함) */}
         {!isLoadingVoices && (
-          <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+          <div className="grid grid-cols-1 gap-2">
             {/* Default Voice Option - 스크롤 내부로 이동 */}
             <div
               className={`relative p-3 rounded-lg border cursor-pointer transition-all ${

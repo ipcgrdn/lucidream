@@ -38,6 +38,7 @@ export default function ChatMessages({
 }: ChatMessagesProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const lastProcessedMessageRef = useRef<string>("");
 
   // TTS 훅
   const {
@@ -112,7 +113,12 @@ export default function ChatMessages({
 
   // 자동 TTS 재생
   useEffect(() => {
-    if (autoTTS && lastCompletedMessage && lastCompletedMessage.trim()) {
+    if (
+      autoTTS &&
+      lastCompletedMessage &&
+      lastCompletedMessage.trim() &&
+      lastCompletedMessage !== lastProcessedMessageRef.current
+    ) {
       // 마지막 메시지가 assistant 메시지인지 확인
       const lastMessage = messages[messages.length - 1];
       if (
@@ -120,6 +126,9 @@ export default function ChatMessages({
         lastMessage.role === "assistant" &&
         lastMessage.content === lastCompletedMessage
       ) {
+        // 이미 처리된 메시지로 표시
+        lastProcessedMessageRef.current = lastCompletedMessage;
+
         // TTS가 이미 진행 중이거나 로딩 중이면 중단
         if (isPlaying || ttsLoading) {
           stop();
@@ -135,15 +144,7 @@ export default function ChatMessages({
         return () => clearTimeout(timer);
       }
     }
-  }, [
-    lastCompletedMessage,
-    autoTTS,
-    messages,
-    speak,
-    isPlaying,
-    ttsLoading,
-    stop,
-  ]);
+  }, [lastCompletedMessage, autoTTS, messages]);
 
   if (messagesLoading) {
     return (

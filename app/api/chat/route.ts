@@ -8,7 +8,7 @@ const openai = new OpenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const { messages, characterId, currentAffectionPoints } =
+    const { messages, characterId, currentAffectionPoints, userId } =
       await request.json();
 
     if (!messages || !Array.isArray(messages)) {
@@ -107,14 +107,24 @@ CRITICAL: Every response must start with [ANIMATION:preset_name] using ONLY the 
 
     // 캐릭터 시스템 프롬프트 추가
     if (characterId) {
-      const { getCharacterById } = await import("@/lib/characters");
-      const character = getCharacterById(characterId);
+      // 서버용 함수 사용 - RLS 우회 가능
+      const { getCharacterByIdUnifiedServer } = await import(
+        "@/lib/serverCustomCharacter"
+      );
+      const character = await getCharacterByIdUnifiedServer(
+        characterId,
+        userId
+      );
+
       if (character && character.systemPrompt) {
         systemPrompt += `\n\n=== CHARACTER PERSONA ===\n${character.systemPrompt}\n\nRemember: Fully embody this character while following the core directives above. You ARE this character living in the LuciDream virtual world.`;
+      } else {
       }
+    } else {
     }
 
     // 시스템 메시지를 맨 앞에 추가
+
     const messagesWithSystem = [
       { role: "system", content: systemPrompt },
       ...messages,
@@ -131,6 +141,7 @@ CRITICAL: Every response must start with [ANIMATION:preset_name] using ONLY the 
       })),
       max_completion_tokens: 1000,
       stream: true,
+      reasoning_effort: "minimal",
     });
 
     const encoder = new TextEncoder();
@@ -150,7 +161,6 @@ CRITICAL: Every response must start with [ANIMATION:preset_name] using ONLY the 
           controller.enqueue(encoder.encode(endData));
           controller.close();
         } catch (error) {
-          console.error("Streaming error:", error);
           controller.error(error);
         }
       },
@@ -164,7 +174,6 @@ CRITICAL: Every response must start with [ANIMATION:preset_name] using ONLY the 
       },
     });
   } catch (error) {
-    console.error("OpenAI API error:", error);
     return NextResponse.json(
       { error: "Failed to generate response" },
       { status: 500 }

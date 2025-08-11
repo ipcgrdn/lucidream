@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
-import { Character } from "@/lib/characters";
+import { Character, getAllCharacters } from "@/lib/characters";
 import {
   getUserBackgrounds,
   uploadBackgroundImage,
@@ -19,19 +19,37 @@ interface BackgroundOption {
 }
 
 // 캐릭터별 배경 옵션 생성 함수
-const getCharacterBackgrounds = (characterId: string): BackgroundOption[] => {
-  return [
-    {
-      id: `${characterId}_1`,
-      path: `/background/${characterId}.png`,
-      type: "character",
-    },
-    {
-      id: `${characterId}_2`,
-      path: `/background/${characterId}2.png`,
-      type: "character",
-    },
-  ];
+const getCharacterBackgrounds = (character: Character): BackgroundOption[] => {
+  // 기본 캐릭터들의 ID 목록 가져오기
+  const defaultCharacters = getAllCharacters();
+  const isDefaultCharacter = defaultCharacters.some(
+    (c) => c.id === character.id
+  );
+
+  if (!isDefaultCharacter) {
+    // 커스텀 캐릭터의 경우 실제 배경 이미지 URL 사용
+    return [
+      {
+        id: `${character.id}_custom`,
+        path: character.backgroundImage,
+        type: "character",
+      },
+    ];
+  } else {
+    // 기본 캐릭터의 경우 기존 로직 사용
+    return [
+      {
+        id: `${character.id}_1`,
+        path: `/background/${character.id}.png`,
+        type: "character",
+      },
+      {
+        id: `${character.id}_2`,
+        path: `/background/${character.id}2.png`,
+        type: "character",
+      },
+    ];
+  }
 };
 
 interface BackgroundSelectionModalProps {
@@ -190,7 +208,7 @@ export default function BackgroundSelectionModal({
                 Default Scenes
               </h4>
               <div className="space-y-3">
-                {getCharacterBackgrounds(character.id).map((background) => (
+                {getCharacterBackgrounds(character).map((background) => (
                   <div
                     key={background.id}
                     className="relative cursor-pointer bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl overflow-hidden transition-all duration-200 group"

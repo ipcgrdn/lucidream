@@ -1,13 +1,17 @@
 "use client";
 
-import Image from "next/image";
 import { Carousel } from "@/components/ui/carousel";
-import Link from "next/link";
 import { useAuth } from "@/contexts/Authcontext";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getAllCharacters } from "@/lib/characters";
+import {
+  getUserCustomCharacters,
+  CustomCharacter,
+} from "@/lib/custom_character";
 import RecentModal from "@/components/modal/RecentModal";
+import Link from "next/link";
+import Image from "next/image";
 
 const characters = getAllCharacters();
 
@@ -18,7 +22,19 @@ const characterData = [
     description: char.description,
     button: `Meet ${char.name}`,
     src: char.previewImage,
-  }))
+  })),
+];
+
+// Custom models data with create button as first item
+const baseCustomCharacterData = [
+  {
+    id: "create-new",
+    title: "Custom Character",
+    description:
+      "Design your own unique character with custom personality and appearance",
+    button: "Create New",
+    src: "create",
+  },
 ];
 
 export default function Dream() {
@@ -26,18 +42,43 @@ export default function Dream() {
   const router = useRouter();
 
   const [isRecentModalOpen, setIsRecentModalOpen] = useState(false);
+  const [customCharacters, setCustomCharacters] = useState<CustomCharacter[]>(
+    []
+  );
 
+  // Load custom characters when user is authenticated
   useEffect(() => {
+    const loadCustomCharacters = async () => {
+      if (user?.id) {
+        const characters = await getUserCustomCharacters(user.id);
+        setCustomCharacters(characters);
+      }
+    };
+
     if (!loading && !user) {
       router.push("/auth");
+    } else if (user?.id) {
+      loadCustomCharacters();
     }
   }, [user, loading, router]);
 
+  // Combine base custom character data with user's custom characters
+  const customCharacterData = [
+    ...baseCustomCharacterData,
+    ...customCharacters.map((char) => ({
+      id: char.id,
+      title: char.name,
+      description: char.description,
+      button: `Meet ${char.name}`,
+      src: char.preview_image_url,
+    })),
+  ];
+
   return (
     <div className="min-h-screen">
-      {/* Top Navigation */}
+      {/* Dream Navigation */}
       <nav className="absolute top-6 left-1/2 transform -translate-x-1/2 z-20">
-        <div className="flex items-center justify-between min-w-xs md:min-w-xl px-4 py-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full shadow-lg shadow-black/10">
+        <div className="flex items-center justify-between min-w-xs md:min-w-xl px-4 py-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full shadow shadow-black/10">
           <Link href="/" className="flex items-center">
             <Image
               src="/logo.png"
@@ -100,9 +141,21 @@ export default function Dream() {
       </nav>
 
       {/* Main Content */}
-      <main className="flex items-center justify-center min-h-screen overflow-hidden pt-0 md:pt-20">
-        {/* Character Carousel */}
-        <Carousel slides={characterData} userId={user?.id || ""} />
+      <main className="min-h-screen pt-28 md:pt-32 pb-20 px-4">
+        {/* Default Models Section */}
+        <section className="mb-20">
+          <Carousel slides={characterData} userId={user?.id || ""} />
+        </section>
+
+        {/* Section Divider */}
+        <div className="flex items-center justify-center mb-20">
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+        </div>
+
+        {/* Custom Models Section */}
+        <section>
+          <Carousel slides={customCharacterData} userId={user?.id || ""} />
+        </section>
       </main>
 
       {/* Recent Modal */}

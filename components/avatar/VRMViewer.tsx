@@ -17,6 +17,7 @@ interface VRMViewerProps {
   onAnimationChange?: (preset: AnimationPresetType) => void;
   audioElement?: HTMLAudioElement | null;
   enableLipSync?: boolean;
+  dreamId?: string;
 }
 
 export default function VRMViewer({
@@ -29,6 +30,7 @@ export default function VRMViewer({
   onAnimationChange,
   audioElement,
   enableLipSync = false,
+  dreamId,
 }: VRMViewerProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [backgroundBlur, setBackgroundBlur] = useState(0);
@@ -39,13 +41,30 @@ export default function VRMViewer({
   useEffect(() => {
     // 로컬 스토리지에서 설정 로드
     const savedBlur = localStorage.getItem("backgroundBlur");
-    const savedBackground = localStorage.getItem("selectedBackground");
 
     if (savedBlur) {
       setBackgroundBlur(parseInt(savedBlur));
     }
-    if (savedBackground) {
-      setCurrentBackgroundImage(savedBackground);
+
+    // dream별 배경 설정 로드
+    if (dreamId) {
+      const dreamBackgroundKey = `selectedBackground_${dreamId}`;
+      const savedDreamBackground = localStorage.getItem(dreamBackgroundKey);
+
+      if (savedDreamBackground) {
+        setCurrentBackgroundImage(savedDreamBackground);
+      } else {
+        // dream별 배경이 없으면 기본 배경 사용
+        setCurrentBackgroundImage(backgroundImage);
+      }
+    } else {
+      // dreamId가 없으면 전역 배경 사용 (기존 로직)
+      const savedBackground = localStorage.getItem("selectedBackground");
+      if (savedBackground) {
+        setCurrentBackgroundImage(savedBackground);
+      } else {
+        setCurrentBackgroundImage(backgroundImage);
+      }
     }
 
     // 블러 변경 이벤트 리스너
@@ -77,7 +96,7 @@ export default function VRMViewer({
         handleBackgroundImageChange as EventListener
       );
     };
-  }, []);
+  }, [dreamId, backgroundImage]);
 
   return (
     <div className={`w-full h-full relative ${className}`}>

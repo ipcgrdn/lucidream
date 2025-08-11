@@ -1,9 +1,11 @@
 import VRMViewer from "@/components/avatar/VRMViewer";
 import { Character } from "@/lib/characters";
 import { AnimationPresetType } from "@/lib/vrm-animations";
+import { Dream } from "@/lib/dreams";
 
 interface ChatBackgroundProps {
   character: Character;
+  dream?: Dream;
   animationPreset?: AnimationPresetType;
   onAnimationChange?: (preset: AnimationPresetType) => void;
   audioElement?: HTMLAudioElement | null;
@@ -12,6 +14,7 @@ interface ChatBackgroundProps {
 
 export default function ChatBackground({
   character,
+  dream,
   animationPreset = "idle",
   onAnimationChange,
   audioElement,
@@ -27,6 +30,7 @@ export default function ChatBackground({
         onAnimationChange={onAnimationChange}
         audioElement={audioElement}
         enableLipSync={enableLipSync}
+        dreamId={dream?.id}
       />
     </div>
   );

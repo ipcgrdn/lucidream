@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Dream, getDreamsByUserId } from "@/lib/dreams";
-import { getCharacterById } from "@/lib/characters";
+import { getCharacterByIdUnified } from "@/lib/custom_character";
+import { Character } from "@/lib/characters";
 import { useRouter } from "next/navigation";
 import { LoaderTwo } from "../ui/loader";
 import Image from "next/image";
@@ -14,12 +15,16 @@ interface RecentModalProps {
   userId: string;
 }
 
+interface DreamWithCharacter extends Dream {
+  character?: Character;
+}
+
 export default function RecentModal({
   isOpen,
   onClose,
   userId,
 }: RecentModalProps) {
-  const [dreams, setDreams] = useState<Dream[]>([]);
+  const [dreams, setDreams] = useState<DreamWithCharacter[]>([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -30,9 +35,24 @@ export default function RecentModal({
       setLoading(true);
       try {
         const recentDreams = await getDreamsByUserId(userId);
-        setDreams(recentDreams || []);
+        if (recentDreams && recentDreams.length > 0) {
+          // 각 dream의 캐릭터 정보도 함께 로드
+          const dreamsWithCharacters = await Promise.all(
+            recentDreams.map(async (dream) => {
+              const character = await getCharacterByIdUnified(
+                dream.character_id,
+                userId
+              );
+              return { ...dream, character };
+            })
+          );
+          setDreams(dreamsWithCharacters as DreamWithCharacter[]);
+        } else {
+          setDreams([]);
+        }
       } catch (error) {
         console.error("Recent dreams 로딩 에러:", error);
+        setDreams([]);
       } finally {
         setLoading(false);
       }
@@ -94,8 +114,7 @@ export default function RecentModal({
           ) : (
             <div className="space-y-3">
               {dreams.map((dream) => {
-                const character = getCharacterById(dream.character_id);
-                if (!character) return null;
+                if (!dream.character) return null;
 
                 return (
                   <button
@@ -106,8 +125,8 @@ export default function RecentModal({
                     <div className="flex items-center space-x-3">
                       <div className="w-12 h-12 rounded-full overflow-hidden bg-white/10 flex-shrink-0">
                         <Image
-                          src={character.previewImage}
-                          alt={character.name}
+                          src={dream.character.previewImage}
+                          alt={dream.character.name}
                           width={48}
                           height={48}
                           className="w-full h-full object-cover"
@@ -115,10 +134,10 @@ export default function RecentModal({
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="text-white font-medium group-hover:text-white/90 transition-colors">
-                          {character.name}
+                          {dream.character.name}
                         </h3>
                         <p className="text-white/60 text-sm truncate">
-                          {character.description}
+                          {dream.character.description}
                         </p>
                         {dream.updated_at && (
                           <p className="text-white/40 text-xs mt-1">

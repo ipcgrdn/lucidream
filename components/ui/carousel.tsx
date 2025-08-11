@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useRef, useId, useEffect } from "react";
+import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { findOrCreateDream } from "@/lib/dreams";
+import CreateCharacterModal from "@/components/modal/CreateCharacterModal";
 
 interface SlideData {
   id: string;
@@ -12,25 +14,29 @@ interface SlideData {
   src: string;
 }
 
-interface ChatButtonProps {
-  slide: SlideData;
+interface CharacterCardProps {
+  character: SlideData;
   userId: string;
+  onCreateNew?: () => void;
 }
 
-const ChatButton = ({ slide, userId }: ChatButtonProps) => {
+const CharacterCard = ({
+  character,
+  userId,
+  onCreateNew,
+}: CharacterCardProps) => {
   const router = useRouter();
 
   const handleClick = async () => {
-    if (slide.id === "create") {
-      alert("Coming soon!");
+    if (character.id === "create-new") {
+      onCreateNew?.();
     } else {
       if (!userId) {
         console.error("사용자 ID가 없습니다");
         return;
       }
 
-      // 기존 dream 확인 또는 새로 생성
-      const dream = await findOrCreateDream(userId, slide.id);
+      const dream = await findOrCreateDream(userId, character.id);
 
       if (dream) {
         router.push(`/dream/${dream.id}`);
@@ -41,176 +47,56 @@ const ChatButton = ({ slide, userId }: ChatButtonProps) => {
   };
 
   return (
-    <button
-      className="mt-4 px-4 py-2 w-fit mx-auto sm:text-sm text-black bg-white h-12 border border-transparent text-xs flex justify-center items-center rounded-2xl hover:shadow-lg transition duration-200 shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)] hover:opacity-90"
+    <div
       onClick={handleClick}
+      className="group cursor-pointer bg-white/10 backdrop-blur-sm rounded-3xl overflow-hidden hover:bg-white/15 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-black/25 border border-white/20"
     >
-      {slide.button}
-    </button>
-  );
-};
-
-interface SlideProps {
-  slide: SlideData;
-  index: number;
-  current: number;
-  handleSlideClick: (index: number) => void;
-  userId: string;
-}
-
-const Slide = ({
-  slide,
-  index,
-  current,
-  handleSlideClick,
-  userId,
-}: SlideProps) => {
-  const slideRef = useRef<HTMLLIElement>(null);
-
-  const xRef = useRef(0);
-  const yRef = useRef(0);
-  const frameRef = useRef<number>(0);
-
-  useEffect(() => {
-    const animate = () => {
-      if (!slideRef.current) return;
-
-      const x = xRef.current;
-      const y = yRef.current;
-
-      slideRef.current.style.setProperty("--x", `${x}px`);
-      slideRef.current.style.setProperty("--y", `${y}px`);
-
-      frameRef.current = requestAnimationFrame(animate);
-    };
-
-    frameRef.current = requestAnimationFrame(animate);
-
-    return () => {
-      if (frameRef.current) {
-        cancelAnimationFrame(frameRef.current);
-      }
-    };
-  }, []);
-
-  const handleMouseMove = (event: React.MouseEvent) => {
-    const el = slideRef.current;
-    if (!el) return;
-
-    const r = el.getBoundingClientRect();
-    xRef.current = event.clientX - (r.left + Math.floor(r.width / 2));
-    yRef.current = event.clientY - (r.top + Math.floor(r.height / 2));
-  };
-
-  const handleMouseLeave = () => {
-    xRef.current = 0;
-    yRef.current = 0;
-  };
-
-  const imageLoaded = (event: React.SyntheticEvent<HTMLImageElement>) => {
-    event.currentTarget.style.opacity = "1";
-  };
-
-  const { src, title, description } = slide;
-
-  return (
-    <div className="[perspective:1200px] [transform-style:preserve-3d]">
-      <li
-        ref={slideRef}
-        className="flex flex-1 flex-col items-center justify-center relative text-center text-white opacity-100 transition-all duration-300 ease-in-out w-[70vmin] h-[70vmin] mx-[4vmin] z-10 "
-        onClick={() => handleSlideClick(index)}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        style={{
-          transform:
-            current !== index
-              ? "scale(0.98) rotateX(8deg)"
-              : "scale(1) rotateX(0deg)",
-          transition: "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-          transformOrigin: "bottom",
-        }}
-      >
-        <div
-          className="absolute top-0 left-0 w-full h-full bg-white rounded-2xl overflow-hidden transition-all duration-150 ease-out"
-          style={{
-            transform:
-              current === index
-                ? "translate3d(calc(var(--x) / 30), calc(var(--y) / 30), 0)"
-                : "none",
-          }}
-        >
-          {src === "create" ? (
-            <div className="absolute inset-0 bg-gray-50"></div>
-          ) : (
-            <img
-              className="absolute inset-0 w-[120%] h-[120%] object-cover opacity-100 transition-opacity duration-600 ease-in-out"
-              style={{
-                opacity: current === index ? 1 : 0.5,
-              }}
-              alt={title}
-              src={src}
-              onLoad={imageLoaded}
-              loading="eager"
-              decoding="sync"
-            />
-          )}
-          {current === index && (
-            <div className="absolute inset-0 bg-black/30 transition-all duration-1000" />
-          )}
-        </div>
-
-        <article
-          className={`relative p-[4vmin] transition-opacity duration-1000 ease-in-out ${
-            current === index ? "opacity-100 visible" : "opacity-0 invisible"
-          }`}
-        >
-          <h2 className="text-lg md:text-2xl lg:text-4xl font-semibold  relative">
-            {title}
-          </h2>
-          <p className="text-xs md:text-base mt-2">{description}</p>
-          <div className="flex justify-center">
-            <ChatButton slide={slide} userId={userId} />
+      {/* Image Container */}
+      <div className="aspect-square relative overflow-hidden">
+        {character.src === "create" ? (
+          <div className="w-full h-full bg-white flex items-center justify-center">
+            <svg
+              className="w-16 h-16 text-black"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
           </div>
-        </article>
-      </li>
+        ) : (
+          <Image
+            src={character.src}
+            alt={character.title}
+            width={300}
+            height={300}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          />
+        )}
+
+        {/* Overlay on hover */}
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      </div>
+
+      {/* Content */}
+      <div className="p-6">
+        <h3 className="text-white font-bold text-xl mb-2 group-hover:text-white/90 transition-colors">
+          {character.title}
+        </h3>
+        <p className="text-white/70 text-sm mb-4 line-clamp-2 group-hover:text-white/80 transition-colors">
+          {character.description}
+        </p>
+
+        <button className="w-full py-3 bg-white/20 text-white rounded-xl hover:bg-white hover:text-black font-medium transition-all duration-200 backdrop-blur-sm border border-white/30">
+          {character.button}
+        </button>
+      </div>
     </div>
-  );
-};
-
-interface CarouselControlProps {
-  type: string;
-  title: string;
-  handleClick: () => void;
-}
-
-const CarouselControl = ({
-  type,
-  title,
-  handleClick,
-}: CarouselControlProps) => {
-  return (
-    <button
-      className={`w-10 h-10 flex items-center mx-2 justify-center bg-neutral-200 dark:bg-neutral-800 border-3 border-transparent rounded-full focus:border-[#6D64F7] focus:outline-none hover:-translate-y-0.5 active:translate-y-0.5 transition duration-200 ${
-        type === "previous" ? "" : "rotate-180"
-      }`}
-      title={title}
-      onClick={handleClick}
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth="1.5"
-        stroke="currentColor"
-        className="w-6 h-6"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M15.75 19.5L8.25 12l7.5-7.5"
-        />
-      </svg>
-    </button>
   );
 };
 
@@ -220,62 +106,32 @@ interface CarouselProps {
 }
 
 export function Carousel({ slides, userId }: CarouselProps) {
-  const [current, setCurrent] = useState(0);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  const handlePreviousClick = () => {
-    const previous = current - 1;
-    setCurrent(previous < 0 ? slides.length - 1 : previous);
+  const handleCreateNew = () => {
+    setIsCreateModalOpen(true);
   };
-
-  const handleNextClick = () => {
-    const next = current + 1;
-    setCurrent(next === slides.length ? 0 : next);
-  };
-
-  const handleSlideClick = (index: number) => {
-    if (current !== index) {
-      setCurrent(index);
-    }
-  };
-
-  const id = useId();
 
   return (
-    <div
-      className="relative w-[70vmin] h-[70vmin] mx-auto"
-      aria-labelledby={`carousel-heading-${id}`}
-    >
-      <ul
-        className="absolute flex mx-[-4vmin] transition-transform duration-1000 ease-in-out"
-        style={{
-          transform: `translateX(-${current * (100 / slides.length)}%)`,
-        }}
-      >
-        {slides.map((slide, index) => (
-          <Slide
-            key={index}
-            slide={slide}
-            index={index}
-            current={current}
-            handleSlideClick={handleSlideClick}
-            userId={userId}
-          />
-        ))}
-      </ul>
-
-      <div className="absolute flex justify-center w-full top-[calc(100%+1rem)]">
-        <CarouselControl
-          type="previous"
-          title="Go to previous slide"
-          handleClick={handlePreviousClick}
-        />
-
-        <CarouselControl
-          type="next"
-          title="Go to next slide"
-          handleClick={handleNextClick}
-        />
+    <>
+      <div className="w-full max-w-6xl mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {slides.map((slide) => (
+            <CharacterCard
+              key={slide.id}
+              character={slide}
+              userId={userId}
+              onCreateNew={handleCreateNew}
+            />
+          ))}
+        </div>
       </div>
-    </div>
+
+      <CreateCharacterModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        userId={userId}
+      />
+    </>
   );
 }
