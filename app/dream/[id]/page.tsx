@@ -43,6 +43,22 @@ export default function DreamChatPage() {
     return false;
   });
 
+  const [minimalMode, setMinimalMode] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("minimalMode");
+      return saved ? JSON.parse(saved) : false;
+    }
+    return false;
+  });
+
+  const [speakMode, setSpeakMode] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("speakMode");
+      return saved ? JSON.parse(saved) : false;
+    }
+    return false;
+  });
+
   const [dream, setDream] = useState<Dream | null>(null);
   const [character, setCharacter] = useState<Character | null>(null);
   const [dreamLoading, setDreamLoading] = useState(true);
@@ -435,6 +451,24 @@ export default function DreamChatPage() {
 
   return (
     <div className="h-screen w-full relative overflow-hidden">
+      {/* Minimal Mode Background */}
+      {minimalMode && (
+        <div className="absolute inset-0 z-[-10]">
+          {/* Character-themed blur background */}
+          <div
+            className="absolute inset-0 opacity-80"
+            style={{
+              backgroundImage: character
+                ? `url(${character.previewImage})`
+                : "none",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              filter: "blur(10px) brightness(0.3)",
+            }}
+          />
+        </div>
+      )}
+
       <ChatNavbar
         onBackClick={() => router.push("/dream")}
         onLeftMenuClick={() => {
@@ -454,14 +488,16 @@ export default function DreamChatPage() {
         affectionPoints={currentAffectionPoints}
       />
 
-      <ChatBackground
-        character={character}
-        dream={dream}
-        animationPreset={currentAnimation}
-        onAnimationChange={handleAnimationChange}
-        audioElement={currentAudioElement}
-        enableLipSync={true}
-      />
+      {!minimalMode && (
+        <ChatBackground
+          character={character}
+          dream={dream}
+          animationPreset={currentAnimation}
+          onAnimationChange={handleAnimationChange}
+          audioElement={currentAudioElement}
+          enableLipSync={true}
+        />
+      )}
 
       <LeftCard
         isOpen={isLeftCardOpen}
@@ -474,6 +510,12 @@ export default function DreamChatPage() {
           localStorage.setItem("autoTTS", JSON.stringify(newAutoTTS));
         }}
         onAnimationPlay={handleAnimationChange}
+        minimalMode={minimalMode}
+        onMinimalModeToggle={() => {
+          const newMinimalMode = !minimalMode;
+          setMinimalMode(newMinimalMode);
+          localStorage.setItem("minimalMode", JSON.stringify(newMinimalMode));
+        }}
       />
 
       <RightCard
@@ -501,6 +543,12 @@ export default function DreamChatPage() {
               setInputValue={setInputValue}
               onSendMessage={sendMessage}
               isLoading={isLoading}
+              speakMode={speakMode}
+              onSpeakModeToggle={() => {
+                const newSpeakMode = !speakMode;
+                setSpeakMode(newSpeakMode);
+                localStorage.setItem("speakMode", JSON.stringify(newSpeakMode));
+              }}
             />
           </div>
         </div>

@@ -20,6 +20,8 @@ interface LeftCardProps {
   autoTTS?: boolean;
   onAutoTTSToggle?: () => void;
   onAnimationPlay?: (presetType: AnimationPresetType) => void;
+  minimalMode?: boolean;
+  onMinimalModeToggle?: () => void;
 }
 
 export default function LeftCard({
@@ -29,6 +31,8 @@ export default function LeftCard({
   autoTTS,
   onAutoTTSToggle,
   onAnimationPlay,
+  minimalMode,
+  onMinimalModeToggle,
 }: LeftCardProps) {
   const [activeSection, setActiveSection] = useState<LeftCardSection>(() => {
     if (typeof window !== "undefined") {
@@ -125,7 +129,11 @@ export default function LeftCard({
         {/* 섹션 내용 */}
         <div className="flex-1 overflow-hidden">
           {activeSection === "character" && (
-            <CharacterSection character={character} />
+            <CharacterSection 
+              character={character} 
+              minimalMode={minimalMode}
+              onMinimalModeToggle={onMinimalModeToggle}
+            />
           )}
 
           {activeSection === "audio" && (

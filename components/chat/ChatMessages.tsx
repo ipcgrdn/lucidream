@@ -190,7 +190,7 @@ export default function ChatMessages({
             className={`max-w-[80%] p-3 rounded-2xl relative group ${
               message.role === "user"
                 ? "bg-black/10 text-white ml-2"
-                : "bg-white/10 text-black mr-2"
+                : "bg-white/10 text-white mr-2"
             }`}
           >
             <p className="text-sm leading-relaxed whitespace-pre-wrap">
