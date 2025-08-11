@@ -77,7 +77,7 @@ export default function Dream() {
   return (
     <div className="min-h-screen">
       {/* Dream Navigation */}
-      <nav className="absolute top-6 left-1/2 transform -translate-x-1/2 z-20">
+      <nav className="fixed top-6 left-1/2 transform -translate-x-1/2 z-20">
         <div className="flex items-center justify-between min-w-xs md:min-w-xl px-4 py-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full shadow shadow-black/10">
           <Link href="/" className="flex items-center">
             <Image
