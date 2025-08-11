@@ -412,8 +412,8 @@ export default function CreateCharacterModal({
                 maxLength={2000}
               />
               <div className="text-white/40 text-xs mt-1">
-                Example: "You are a bright and energetic character. You speak in
-                a friendly tone and..."
+                Example: &lt;You are a bright and energetic character. You speak in
+                a friendly tone and...&gt;
               </div>
             </div>
           </div>
