@@ -48,10 +48,11 @@ export default function Terms() {
                   1. Agreement to Terms
                 </h2>
                 <p>
-                  By accessing or using LuciDream ("Service," "we," "us," or
-                  "our"), you agree to be bound by these Terms of Service
-                  ("Terms"). If you disagree with any part of these terms, you
-                  may not access the Service.
+                  By accessing or using LuciDream (&#34;Service,&#34;
+                  &#34;we,&#34; &#34;us,&#34; or &#34;our&#34;), you agree to be
+                  bound by these Terms of Service (&#34;Terms&#34;). If you
+                  disagree with any part of these terms, you may not access the
+                  Service.
                 </p>
               </section>
 
@@ -348,8 +349,8 @@ export default function Terms() {
                   10. Disclaimer of Warranties
                 </h2>
                 <p>
-                  THE SERVICE IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY
-                  KIND. WE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED,
+                  THE SERVICE IS PROVIDED &amp;AS IS&amp; WITHOUT WARRANTIES OF
+                  ANY KIND. WE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED,
                   INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
                   AND NON-INFRINGEMENT. WE DO NOT WARRANT THAT THE SERVICE WILL
                   BE ERROR-FREE OR UNINTERRUPTED.

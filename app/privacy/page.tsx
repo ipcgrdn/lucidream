@@ -48,10 +48,10 @@ export default function Privacy() {
                   1. Introduction
                 </h2>
                 <p>
-                  Welcome to LuciDream ("we," "our," or "us"). This Privacy
-                  Policy explains how we collect, use, disclose, and safeguard
-                  your information when you use our AI avatar chat application
-                  and related services.
+                  Welcome to LuciDream (&#34;we,&#34; &#34;our,&#34; or
+                  &#34;us&#34;). This Privacy Policy explains how we collect,
+                  use, disclose, and safeguard your information when you use our
+                  AI avatar chat application and related services.
                 </p>
               </section>
 
@@ -253,7 +253,8 @@ export default function Privacy() {
                 <p>
                   We may update this Privacy Policy from time to time. We will
                   notify you of any material changes by posting the new Privacy
-                  Policy on this page and updating the "Last updated" date.
+                  Policy on this page and updating the &#34;Last updated&#34;
+                  date.
                 </p>
               </section>
 
