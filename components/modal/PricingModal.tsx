@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { BackgroundGradient } from "@/components/ui/background-gradient";
+import { useAuth } from "@/contexts/Authcontext";
 
 interface PricingModalProps {
   isOpen: boolean;
@@ -11,6 +12,40 @@ interface PricingModalProps {
 
 export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
   const [isAnnual, setIsAnnual] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
+
+  const handleStartPremium = async () => {
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/lemonsqueezy/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          isAnnual,
+          userId: user?.id,
+          userEmail: user?.email,
+          userName: user?.user_metadata.name,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        console.error("결제 페이지를 불러오는데 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("결제 오류:", error);
+      console.error("결제 처리 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -309,8 +344,12 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                       </li>
                     </ul>
 
-                    <button className="w-full py-3 px-6 bg-white hover:bg-gray-100 rounded-lg text-black font-semibold transition-all transform hover:scale-105">
-                      Start Premium Journey
+                    <button
+                      onClick={handleStartPremium}
+                      disabled={isLoading}
+                      className="w-full py-3 px-6 bg-white hover:bg-gray-100 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg text-black font-semibold transition-all transform hover:scale-105 disabled:hover:scale-100"
+                    >
+                      {isLoading ? "Loading..." : "Start Premium Journey"}
                     </button>
                   </div>
                 </BackgroundGradient>
