@@ -46,7 +46,7 @@ export default function Home() {
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden">
+    <div className="relative w-full h-screen overflow-hiadden">
       <video
         autoPlay
         playsInline
@@ -60,7 +60,7 @@ export default function Home() {
 
       <Navbar />
 
-      <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-8">
+      <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-8 overflow-auto">
         <div className="mb-2">
           <Image
             src="/logo.png"
@@ -129,6 +129,24 @@ export default function Home() {
                 slidePosition > 0 ? Math.min(slidePosition / 200, 0.6) : 0,
             }}
           />
+        </div>
+
+        {/* Footer Section */}
+        <div className="absolute bottom-[-40px] left-0 right-0 text-center">
+          <div className="flex justify-center space-x-4 text-sm text-white/50 mb-6">
+            <button
+              className="hover:text-white transition-colors duration-200 cursor-pointer"
+              onClick={() => router.push("/privacy")}
+            >
+              Privacy Policy
+            </button>
+            <button
+              className="hover:text-white transition-colors duration-200 cursor-pointer"
+              onClick={() => router.push("/terms")}
+            >
+              Terms of Service
+            </button>
+          </div>
         </div>
       </div>
     </div>

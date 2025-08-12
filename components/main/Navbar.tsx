@@ -26,12 +26,6 @@ export default function Navbar() {
 
         {/* Right side - Navigation */}
         <div className="flex items-center space-x-6 text-sm">
-          <Link
-            href="/careers"
-            className="text-white/80 hover:text-white transition-colors duration-200 font-orbitron font-medium hidden md:block"
-          >
-            Careers
-          </Link>
           <button
             onClick={() => setIsPricingModalOpen(true)}
             className="text-white/80 hover:text-white transition-colors duration-200 font-orbitron font-medium hidden md:block"
