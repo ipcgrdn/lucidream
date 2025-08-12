@@ -107,7 +107,7 @@ export default function Privacy() {
                 </h2>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>Provide and maintain our AI avatar chat services</li>
-                  <li>Process conversations through OpenAI's GPT models</li>
+                  <li>Process conversations through OpenAI&apos;s GPT models</li>
                   <li>Convert speech to text using OpenAI Whisper</li>
                   <li>
                     Generate voice responses using ElevenLabs text-to-speech
@@ -223,12 +223,12 @@ export default function Privacy() {
 
               <section>
                 <h2 className="text-2xl font-bold text-white mb-4 font-orbitron">
-                  8. Children's Privacy
+                  8. Children&apos;s Privacy
                 </h2>
                 <p>
                   LuciDream is suitable for users 13 years and older with
                   parental consent for minors. We take special care to protect
-                  children's privacy. If we become aware that we have collected
+                  children&apos;s privacy. If we become aware that we have collected
                   personal information from a child under 13 without parental
                   consent, we will delete such information promptly.
                 </p>

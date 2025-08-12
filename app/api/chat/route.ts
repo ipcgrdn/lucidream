@@ -173,7 +173,7 @@ CRITICAL: Every response must start with [ANIMATION:preset_name] using ONLY the 
         Connection: "keep-alive",
       },
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to generate response" },
       { status: 500 }

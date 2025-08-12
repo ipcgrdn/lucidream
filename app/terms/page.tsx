@@ -125,7 +125,7 @@ export default function Terms() {
                   </li>
                   <li>You may not share your account with others</li>
                   <li>
-                    Parents are responsible for monitoring minors' use of the
+                    Parents are responsible for monitoring minors&apos; use of the
                     Service
                   </li>
                   <li>
@@ -214,7 +214,7 @@ export default function Terms() {
                     Users are responsible for their own emotional well-being
                     during interactions
                   </li>
-                  <li>Parents should monitor minors' use of the Service</li>
+                  <li>Parents should monitor minors&apos; use of the Service</li>
                   <li>
                     We reserve the right to moderate and filter content at our
                     discretion
