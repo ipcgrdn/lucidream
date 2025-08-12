@@ -85,7 +85,7 @@ const CharacterCard = ({
 
       {/* Content */}
       <div className="p-6">
-        <h3 className="text-white font-bold text-xl mb-2 group-hover:text-white/90 transition-colors">
+        <h3 className="text-white font-orbitron font-medium text-xl mb-2 group-hover:text-white/90 transition-colors">
           {character.title}
         </h3>
         <p className="text-white/70 text-sm mb-4 line-clamp-2 group-hover:text-white/80 transition-colors">

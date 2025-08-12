@@ -14,7 +14,7 @@ export default function Navbar() {
             height={40}
             priority
           />
-          <span className="text-white text-xl tracking-tight font-bowlby-one-sc">
+          <span className="text-white text-xl font-medium tracking-tight font-orbitron">
             lucidream
           </span>
         </div>
@@ -23,13 +23,13 @@ export default function Navbar() {
         <div className="flex items-center space-x-6 text-sm">
           <Link
             href="/careers"
-            className="text-white/80 hover:text-white transition-colors duration-200 font-medium hidden md:block"
+            className="text-white/80 hover:text-white transition-colors duration-200 font-orbitron font-medium hidden md:block"
           >
             Careers
           </Link>
           <Link
             href="/pricing"
-            className="text-white/80 hover:text-white transition-colors duration-200 font-medium hidden md:block"
+            className="text-white/80 hover:text-white transition-colors duration-200 font-orbitron font-medium hidden md:block"
           >
             Pricing
           </Link>
@@ -44,7 +44,7 @@ export default function Navbar() {
           </Link>
           <Link
             href="/auth"
-            className="bg-white text-black px-4 py-2 rounded-lg transition-all duration-200 font-medium hover:bg-black hover:text-white"
+            className="bg-white text-black px-4 py-2 rounded-lg transition-all duration-200 font-orbitron font-medium hover:bg-black hover:text-white"
           >
             Get Started
           </Link>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Bowlby_One_SC, Geist, Geist_Mono } from "next/font/google";
+import { Orbitron, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/Authcontext";
 
@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const BowlbyOneSC = Bowlby_One_SC({
-  variable: "--font-bowlby-one-sc",
+const orbitron = Orbitron({
+  variable: "--font-orbitron",
   subsets: ["latin"],
   weight: "400",
 });
@@ -32,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${BowlbyOneSC.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${orbitron.variable} antialiased`}
       >
         <AuthProvider>{children}</AuthProvider>
       </body>

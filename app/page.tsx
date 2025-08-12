@@ -71,11 +71,11 @@ export default function Home() {
           />
         </div>
 
-        <h1 className="text-4xl md:text-6xl font-semibold font-bowlby-one-sc mb-4 text-white">
+        <h1 className="text-4xl md:text-6xl font-extrabold font-orbitron mb-4 text-white">
           Dive into dreams
         </h1>
 
-        <p className="text-md md:text-xl mb-8 max-w-2xl text-gray-200 leading-relaxed">
+        <p className="text-md md:text-xl mb-8 max-w-2xl text-gray-200 font-orbitron leading-relaxed">
           Experience your first meeting with an AI avatar
         </p>
 
@@ -90,7 +90,7 @@ export default function Home() {
           onTouchMove={(e) => handleSlideMove(e.touches[0].clientX)}
           onTouchEnd={handleSlideEnd}
         >
-          <div className="absolute inset-0 flex items-center justify-center text-white text-lg font-medium pl-6">
+          <div className="absolute inset-0 flex items-center justify-center text-white text-lg font-orbitron pl-6">
             <span
               className={`transition-opacity duration-300 ${
                 slidePosition > 50 ? "opacity-50" : "opacity-100"

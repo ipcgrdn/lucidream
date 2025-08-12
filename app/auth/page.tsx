@@ -46,7 +46,7 @@ export default function AuthPage() {
           height={40}
           priority
         />
-        <span className="text-white text-xl font-bold tracking-tight">
+        <span className="text-white text-xl font-orbitron font-medium tracking-tight">
           lucidream
         </span>
       </Link>
@@ -68,7 +68,7 @@ export default function AuthPage() {
       <div className="relative z-10 min-h-screen flex mx-4 md:mx-0">
         <div className="flex-1 flex items-center justify-center lg:justify-start lg:pl-12">
           <div className="w-full max-w-md bg-white/90 backdrop-blur-md rounded-4xl p-8 shadow-2xl">
-            <div className="text-center mb-8">
+            <div className="text-center font-orbitron mb-8">
               <h1 className="text-4xl font-bold text-black mb-1">
                 Get access to <br />
                 lucidream
@@ -77,7 +77,7 @@ export default function AuthPage() {
             </div>
 
             <button
-              className="w-full inline-flex items-center py-4 px-4 rounded-xl bg-black text-white text-sm font-medium hover:bg-black/90 transition-colors duration-200"
+              className="w-full inline-flex items-center py-4 px-4 rounded-xl bg-black text-white text-sm font-orbitron font-medium hover:bg-black/90 transition-colors duration-200"
               onClick={handleGoogleSignIn}
               disabled={isLoading}
             >
@@ -110,7 +110,7 @@ export default function AuthPage() {
               )}
             </button>
 
-            <div className="mt-4 text-center text-xs">
+            <div className="mt-4 text-center font-orbitron text-xs">
               <p className="text-gray-600">
                 By continuing, you agree with the
                 <br />
