@@ -88,9 +88,6 @@ export default function Privacy() {
                   </li>
                   <li>Custom character creations and preferences</li>
                   <li>Premium content access patterns and preferences</li>
-                  <li>
-                    Age verification for premium features (when applicable)
-                  </li>
                   <li>Application usage analytics and performance metrics</li>
                 </ul>
 
@@ -226,53 +223,14 @@ export default function Privacy() {
 
               <section>
                 <h2 className="text-2xl font-bold text-white mb-4 font-orbitron">
-                  8. Children's Privacy and Content Access
+                  8. Children's Privacy
                 </h2>
-
-                <h3 className="text-lg font-semibold text-white mb-3">
-                  8.1 Age Requirements and Access
-                </h3>
                 <p>
                   LuciDream is suitable for users 13 years and older with
-                  parental consent for minors. Our service includes different
-                  content categories:
-                </p>
-                <ul className="list-disc list-inside space-y-2 ml-4 mt-4">
-                  <li>
-                    <strong>Basic characters:</strong> Suitable for general
-                    audiences
-                  </li>
-                  <li>
-                    <strong>Premium and custom characters:</strong> Restricted
-                    to users 18+ with age verification
-                  </li>
-                </ul>
-
-                <h3 className="text-lg font-semibold text-white mb-3 mt-6">
-                  8.2 Age Verification for Premium Content
-                </h3>
-                <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li>
-                    Premium content requires age verification at time of
-                    purchase
-                  </li>
-                  <li>
-                    We collect age confirmation only for premium feature access
-                  </li>
-                  <li>Users are responsible for truthful age representation</li>
-                  <li>
-                    Payment information serves as additional age verification
-                  </li>
-                </ul>
-
-                <h3 className="text-lg font-semibold text-white mb-3 mt-6">
-                  8.3 Children's Privacy Protection
-                </h3>
-                <p>
-                  We take special care to protect children's privacy. If we
-                  become aware that we have collected personal information from
-                  a child under 13 without parental consent, we will delete such
-                  information promptly.
+                  parental consent for minors. We take special care to protect
+                  children's privacy. If we become aware that we have collected
+                  personal information from a child under 13 without parental
+                  consent, we will delete such information promptly.
                 </p>
               </section>
 

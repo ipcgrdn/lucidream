@@ -13,17 +13,9 @@ interface PricingModalProps {
 export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
   const [isAnnual, setIsAnnual] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [ageConfirmed, setAgeConfirmed] = useState(false);
   const { user } = useAuth();
 
   const handleStartPremium = async () => {
-    if (!ageConfirmed) {
-      alert(
-        "You must confirm that you are 18 years or older to access premium content."
-      );
-      return;
-    }
-
     setIsLoading(true);
 
     try {
@@ -77,9 +69,9 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative z-10 w-full max-w-4xl mx-4 max-h-[80vh] overflow-y-auto"
+            className="relative z-10 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-hidden"
           >
-            <div className="bg-black/80 backdrop-blur-xl border border-white/20 p-8">
+            <div className="bg-black/80 backdrop-blur-xl border border-white/20 rounded-3xl p-8">
               {/* Header */}
               <div className="text-center mb-8">
                 <button
@@ -351,67 +343,16 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                         Early access to new characters
                       </li>
                     </ul>
+
+                    <button
+                      onClick={handleStartPremium}
+                      disabled={isLoading}
+                      className="w-full py-3 px-6 bg-white hover:bg-gray-100 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg text-black font-semibold transition-all transform hover:scale-105 disabled:hover:scale-100"
+                    >
+                      {isLoading ? "Loading..." : "Start Premium Journey"}
+                    </button>
                   </div>
                 </BackgroundGradient>
-              </div>
-
-              {/* Age Verification Section - Moved outside of pricing cards */}
-              <div className="mt-8 p-4 bg-orange-500/10 border border-orange-500/20 rounded-lg">
-                <div className="flex items-start mb-3">
-                  <svg
-                    className="w-5 h-5 text-orange-400 mr-2 mt-0.5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 0 100-2v-3a1 1 0 00-1-1H9z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <div className="text-sm">
-                    <p className="font-medium text-orange-300 mb-1">
-                      Age Restriction Notice
-                    </p>
-                    <p className="text-orange-200">
-                      Premium content includes characters with mature designs
-                      and is restricted to users 18 years and older. By
-                      proceeding, you acknowledge that you understand the nature
-                      of this content and assume full responsibility for your
-                      usage.
-                    </p>
-                  </div>
-                </div>
-
-                <label className="flex items-start space-x-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={ageConfirmed}
-                    onChange={(e) => setAgeConfirmed(e.target.checked)}
-                    className="mt-1 h-4 w-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
-                  />
-                  <span className="text-sm text-white">
-                    <strong>I am 18 years of age or older</strong> and
-                    understand that premium content may include mature visual
-                    designs. I acknowledge full responsibility for accessing and
-                    using such content.
-                  </span>
-                </label>
-              </div>
-
-              {/* Premium Purchase Button - Moved outside of pricing cards */}
-              <div className="mt-6">
-                <button
-                  onClick={handleStartPremium}
-                  disabled={isLoading || !ageConfirmed}
-                  className={`w-full py-4 px-6 rounded-xl font-semibold font-orbitron transition-all transform ${
-                    ageConfirmed && !isLoading
-                      ? "bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/30 text-white shadow-lg backdrop-blur-sm hover:scale-105"
-                      : "bg-gray-600 cursor-not-allowed text-gray-400"
-                  }`}
-                >
-                  {isLoading ? "Loading..." : "Start Premium Journey"}
-                </button>
               </div>
             </div>
           </motion.div>

@@ -105,22 +105,13 @@ export default function Terms() {
                 </h3>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>
-                    <strong>
-                      Premium and custom characters require users to be 18 years
-                      or older
-                    </strong>
+                    Premium features require a valid subscription
                   </li>
                   <li>
-                    Age verification is required at the time of premium content
-                    purchase
+                    Custom character creation is available to premium users
                   </li>
                   <li>
-                    Premium content may include characters with mature visual
-                    designs
-                  </li>
-                  <li>
-                    You acknowledge and accept responsibility for accessing
-                    premium content
+                    Premium users get access to additional chat features
                   </li>
                 </ul>
 
@@ -202,15 +193,11 @@ export default function Terms() {
                 </h3>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>
-                    <strong>Basic characters</strong> are suitable for general
-                    audiences
+                    <strong>Basic characters</strong> are available to all users
                   </li>
                   <li>
-                    <strong>Premium and custom characters</strong> may include
-                    mature visual designs
-                  </li>
-                  <li>
-                    Premium content is restricted to users 18 years and older
+                    <strong>Premium and custom characters</strong> are available
+                    with subscription
                   </li>
                   <li>
                     All conversations are powered by OpenAI and follow content
@@ -367,12 +354,6 @@ export default function Terms() {
                   AND NON-INFRINGEMENT. WE DO NOT WARRANT THAT THE SERVICE WILL
                   BE ERROR-FREE OR UNINTERRUPTED.
                 </p>
-                <p className="mt-4">
-                  <strong>PREMIUM CONTENT DISCLAIMER:</strong> WE MAKE NO
-                  WARRANTIES REGARDING THE APPROPRIATENESS OR SUITABILITY OF
-                  PREMIUM CONTENT. USERS ARE RESPONSIBLE FOR ENSURING THEIR
-                  ACCESS COMPLIES WITH APPLICABLE LAWS IN THEIR JURISDICTION.
-                </p>
               </section>
 
               <section>
@@ -384,12 +365,6 @@ export default function Terms() {
                   FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR
                   PUNITIVE DAMAGES, INCLUDING LOSS OF PROFITS, DATA, OR USE,
                   ARISING FROM YOUR USE OF THE SERVICE.
-                </p>
-                <p className="mt-4">
-                  <strong>CONTENT LIABILITY EXCLUSION:</strong> WE SHALL NOT BE
-                  LIABLE FOR ANY DAMAGES OR CONSEQUENCES RESULTING FROM YOUR
-                  INTERACTION WITH AI-GENERATED CONTENT OR PREMIUM FEATURES.
-                  YOUR USE OF THE SERVICE IS AT YOUR OWN DISCRETION AND RISK.
                 </p>
               </section>
 
