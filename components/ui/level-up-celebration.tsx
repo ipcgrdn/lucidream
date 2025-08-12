@@ -90,10 +90,7 @@ export default function LevelUpCelebration({
           `}
           >
             <span className="text-5xl mb-2">{previousLevel.emoji}</span>
-            <h2
-              className="text-3xl font-bold"
-              style={{ color: previousLevel.color }}
-            >
+            <h2 className="text-3xl font-bold text-white">
               {previousLevel.name}
             </h2>
           </div>
@@ -115,13 +112,7 @@ export default function LevelUpCelebration({
                 {newLevel.emoji}
               </span>
             </div>
-            <h2
-              className="text-4xl font-bold drop-shadow-lg animate-pulse"
-              style={{
-                color: newLevel.color,
-                textShadow: `0 0 20px ${newLevel.color}80`,
-              }}
-            >
+            <h2 className="text-4xl font-bold drop-shadow-lg animate-pulse text-white">
               {newLevel.name}
             </h2>
             <p className="text-white/90 text-lg mt-2 italic">

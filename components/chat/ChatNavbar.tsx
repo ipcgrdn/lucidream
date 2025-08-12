@@ -161,7 +161,7 @@ export default function ChatNavbar({
             }
           `}
         >
-          <div className="py-1">
+          <div className="py-1 font-orbitron">
             <button
               onClick={() => {
                 // TODO: 구독 관리 페이지로 이동 또는 모달 열기
