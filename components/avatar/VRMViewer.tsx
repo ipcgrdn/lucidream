@@ -1,11 +1,63 @@
 "use client";
 
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import VRMModel from "./VRMModel";
 import { AnimationPresetType } from "@/lib/vrm-animations";
 import { LoaderTwo } from "@/components/ui/loader";
+import * as THREE from "three";
+
+// 카메라 줌인 애니메이션 컴포넌트
+function CameraZoomIn({ isLoaded }: { isLoaded: boolean }) {
+  const { camera } = useThree();
+  const animationRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    // 초기 카메라 위치 (멀리)
+    const startPosition = new THREE.Vector3(0, 0.1, -10);
+    // 최종 카메라 위치 (가까이)
+    const endPosition = new THREE.Vector3(0, 0.1, -1);
+
+    // 카메라를 초기 위치로 설정
+    camera.position.copy(startPosition);
+
+    // 애니메이션 시작
+    const startTime = Date.now();
+    const duration = 3000; // 2초
+
+    function animate() {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // easeOutCubic 이징 함수
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+
+      // 카메라 위치 보간
+      camera.position.lerpVectors(startPosition, endPosition, easedProgress);
+
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(animate);
+      }
+    }
+
+    // 약간의 딜레이 후 애니메이션 시작
+    const timeoutId = setTimeout(() => {
+      animate();
+    }, 500);
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+      clearTimeout(timeoutId);
+    };
+  }, [isLoaded, camera]);
+
+  return null;
+}
 
 interface VRMViewerProps {
   modelPath: string;
@@ -124,7 +176,7 @@ export default function VRMViewer({
 
       <Canvas
         className="relative z-10"
-        camera={{ position: [0, 0.1, -1], fov: 35 }}
+        camera={{ position: [0, 0.1, -5], fov: 35 }}
         gl={{ antialias: true, alpha: true }}
         shadows
       >
@@ -136,6 +188,9 @@ export default function VRMViewer({
             </mesh>
           }
         >
+          {/* 카메라 줌인 애니메이션 */}
+          <CameraZoomIn isLoaded={isLoaded} />
+
           {/* 조명 설정 */}
           <ambientLight intensity={0.5} />
           <directionalLight

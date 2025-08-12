@@ -29,9 +29,9 @@ export class LipSyncManager {
 
   private config: LipSyncConfig = {
     smoothingFactor: 0.7,
-    sensitivity: 1.2,
+    sensitivity: 0.65,
     minThreshold: 0.01,
-    maxAmplitude: 0.8,
+    maxAmplitude: 0.4,
   };
 
   constructor(vrm: VRM, config?: Partial<LipSyncConfig>) {
@@ -168,28 +168,31 @@ export class LipSyncManager {
 
     // 'aa' (아) - 낮은-중간 주파수가 강할 때
     this.currentMouthShapes.aa = Math.min(
-      (midLowFreq + midFreq) * sensitivity * 0.6,
+      (midLowFreq + midFreq) * sensitivity * 0.325,
       maxAmp
     );
 
     // 'ih' (이) - 중간-높은 주파수가 강할 때
     this.currentMouthShapes.ih = Math.min(
-      (midFreq + midHighFreq) * sensitivity * 0.5,
+      (midFreq + midHighFreq) * sensitivity * 0.25,
       maxAmp
     );
 
     // 'ou' (오/우) - 낮은 주파수가 강할 때
     this.currentMouthShapes.ou = Math.min(
-      (lowFreq + midLowFreq) * sensitivity * 0.7,
+      (lowFreq + midLowFreq) * sensitivity * 0.4,
       maxAmp
     );
 
     // 'ee' (에) - 중간 주파수 특화
-    this.currentMouthShapes.ee = Math.min(midFreq * sensitivity * 0.6, maxAmp);
+    this.currentMouthShapes.ee = Math.min(
+      midFreq * sensitivity * 0.325,
+      maxAmp
+    );
 
     // 'oh' (오) - 전체적으로 균등하지만 낮은 주파수 우세
     this.currentMouthShapes.oh = Math.min(
-      totalEnergy * sensitivity * 0.4,
+      totalEnergy * sensitivity * 0.25,
       maxAmp
     );
   }
