@@ -51,14 +51,6 @@ export default function DreamChatPage() {
     return false;
   });
 
-  const [speakMode, setSpeakMode] = useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("speakMode");
-      return saved ? JSON.parse(saved) : false;
-    }
-    return false;
-  });
-
   const [dream, setDream] = useState<Dream | null>(null);
   const [character, setCharacter] = useState<Character | null>(null);
   const [dreamLoading, setDreamLoading] = useState(true);
@@ -543,12 +535,6 @@ export default function DreamChatPage() {
               setInputValue={setInputValue}
               onSendMessage={sendMessage}
               isLoading={isLoading}
-              speakMode={speakMode}
-              onSpeakModeToggle={() => {
-                const newSpeakMode = !speakMode;
-                setSpeakMode(newSpeakMode);
-                localStorage.setItem("speakMode", JSON.stringify(newSpeakMode));
-              }}
             />
           </div>
         </div>
