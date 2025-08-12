@@ -10,6 +10,7 @@ import {
   CustomCharacter,
 } from "@/lib/custom_character";
 import RecentModal from "@/components/modal/RecentModal";
+import PricingModal from "@/components/modal/PricingModal";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -42,6 +43,7 @@ export default function Dream() {
   const router = useRouter();
 
   const [isRecentModalOpen, setIsRecentModalOpen] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [customCharacters, setCustomCharacters] = useState<CustomCharacter[]>(
     []
@@ -115,7 +117,10 @@ export default function Dream() {
           </Link>
 
           <div className="flex items-center font-orbitron space-x-6">
-            <button className="text-white/80 hover:text-white transition-colors duration-200 text-sm font-medium">
+            <button
+              onClick={() => setIsPricingModalOpen(true)}
+              className="text-white/80 hover:text-white transition-colors duration-200 text-sm font-medium"
+            >
               Upgrade
             </button>
             <button
@@ -214,6 +219,12 @@ export default function Dream() {
         isOpen={isRecentModalOpen}
         onClose={() => setIsRecentModalOpen(false)}
         userId={user?.id || ""}
+      />
+
+      {/* Pricing Modal */}
+      <PricingModal
+        isOpen={isPricingModalOpen}
+        onClose={() => setIsPricingModalOpen(false)}
       />
     </div>
   );

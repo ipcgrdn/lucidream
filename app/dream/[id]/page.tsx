@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import { useAuth } from "@/contexts/Authcontext";
@@ -23,7 +23,7 @@ import LevelUpCelebration from "@/components/ui/level-up-celebration";
 import AffectionEffect from "@/components/ui/affection-effect";
 
 export default function DreamChatPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const params = useParams();
   const router = useRouter();
   const dreamId = params.id as string;
@@ -100,6 +100,10 @@ export default function DreamChatPage() {
     useState(false);
   const [currentAffectionChange, setCurrentAffectionChange] = useState(0);
 
+  // 프로필 드롭다운 상태
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
+
   // 애니메이션 변경 핸들러
   const handleAnimationChange = useCallback((preset: AnimationPresetType) => {
     setCurrentAnimation(preset);
@@ -123,6 +127,26 @@ export default function DreamChatPage() {
       router.push("/auth");
     }
   }, [user, loading, router]);
+
+  // 프로필 드롭다운 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        profileDropdownRef.current &&
+        !profileDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+
+    if (isProfileDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isProfileDropdownOpen]);
 
   useEffect(() => {
     const loadDreamData = async () => {
@@ -461,24 +485,28 @@ export default function DreamChatPage() {
         </div>
       )}
 
-      <ChatNavbar
-        onBackClick={() => router.push("/dream")}
-        onLeftMenuClick={() => {
-          const newState = !isLeftCardOpen;
-          setIsLeftCardOpen(newState);
-          localStorage.setItem("isLeftCardOpen", JSON.stringify(newState));
-        }}
-        onRightMenuClick={() => {
-          const newState = !isRightCardOpen;
-          setIsRightCardOpen(newState);
-          localStorage.setItem("isRightCardOpen", JSON.stringify(newState));
-        }}
-        onProfileClick={() => {
-          alert("Profile");
-        }}
-        userAvatarUrl={user?.user_metadata?.avatar_url}
-        affectionPoints={currentAffectionPoints}
-      />
+      <div ref={profileDropdownRef}>
+        <ChatNavbar
+          onBackClick={() => router.push("/dream")}
+          onLeftMenuClick={() => {
+            const newState = !isLeftCardOpen;
+            setIsLeftCardOpen(newState);
+            localStorage.setItem("isLeftCardOpen", JSON.stringify(newState));
+          }}
+          onRightMenuClick={() => {
+            const newState = !isRightCardOpen;
+            setIsRightCardOpen(newState);
+            localStorage.setItem("isRightCardOpen", JSON.stringify(newState));
+          }}
+          onProfileClick={() => {
+            setIsProfileDropdownOpen(!isProfileDropdownOpen);
+          }}
+          userAvatarUrl={user?.user_metadata?.avatar_url}
+          affectionPoints={currentAffectionPoints}
+          isProfileDropdownOpen={isProfileDropdownOpen}
+          onSignOut={signOut}
+        />
+      </div>
 
       {!minimalMode && (
         <ChatBackground

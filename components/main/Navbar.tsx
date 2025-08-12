@@ -1,7 +1,12 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+import PricingModal from "@/components/modal/PricingModal";
 
 export default function Navbar() {
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   return (
     <nav className="absolute top-0 left-0 w-full z-20 px-6 py-4">
       <div className="flex items-center justify-between max-w-8xl mx-auto">
@@ -27,12 +32,12 @@ export default function Navbar() {
           >
             Careers
           </Link>
-          <Link
-            href="/pricing"
+          <button
+            onClick={() => setIsPricingModalOpen(true)}
             className="text-white/80 hover:text-white transition-colors duration-200 font-orbitron font-medium hidden md:block"
           >
             Pricing
-          </Link>
+          </button>
           <Link
             href="https://discord.gg/lucidream"
             target="_blank"
@@ -50,6 +55,12 @@ export default function Navbar() {
           </Link>
         </div>
       </div>
+      
+      {/* Pricing Modal */}
+      <PricingModal 
+        isOpen={isPricingModalOpen}
+        onClose={() => setIsPricingModalOpen(false)}
+      />
     </nav>
   );
 }

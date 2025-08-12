@@ -23,7 +23,7 @@ export const AFFECTION_LEVELS: AffectionLevel[] = [
     description: "We barely know each other",
     minPoints: -100,
     maxPoints: 9,
-    color: "#64748b",
+    color: "#000000",
     emoji: "😐",
   },
   {
@@ -32,7 +32,7 @@ export const AFFECTION_LEVELS: AffectionLevel[] = [
     description: "Getting to know each other",
     minPoints: 10,
     maxPoints: 49,
-    color: "#6b7280",
+    color: "#4b0082",
     emoji: "🙂",
   },
   {

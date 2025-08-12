@@ -85,13 +85,7 @@ export default function AffectionBar({
                 )}
               </div>
               <div>
-                <div
-                  className="font-bold text-lg tracking-wider drop-shadow-sm"
-                  style={{
-                    color: currentLevel.color,
-                    textShadow: `0 0 10px ${currentLevel.color}50`,
-                  }}
-                >
+                <div className="font-bold text-lg tracking-wider drop-shadow-sm">
                   {currentLevel.name}
                 </div>
                 <p className="text-xs text-white/70 italic">

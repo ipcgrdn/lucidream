@@ -14,6 +14,8 @@ interface ChatNavbarProps {
   onProfileClick: () => void;
   userAvatarUrl?: string;
   affectionPoints?: number;
+  isProfileDropdownOpen?: boolean;
+  onSignOut?: () => void;
 }
 
 export default function ChatNavbar({
@@ -23,6 +25,8 @@ export default function ChatNavbar({
   onProfileClick,
   userAvatarUrl,
   affectionPoints,
+  isProfileDropdownOpen,
+  onSignOut,
 }: ChatNavbarProps) {
   const [isAffectionDropdownOpen, setIsAffectionDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -90,14 +94,6 @@ export default function ChatNavbar({
                   isAffectionDropdownOpen ? "animate-pulse" : ""
                 }`}
               />
-              {affectionPoints !== undefined && (
-                <div
-                  className="absolute -top-2 -right-2 text-[10px] font-bold text-white rounded-full w-5 h-5 flex items-center justify-center"
-                  style={{ backgroundColor: currentLevel.color }}
-                >
-                  {currentLevel.level}
-                </div>
-              )}
             </div>
           </DockIcon>
 
@@ -150,6 +146,40 @@ export default function ChatNavbar({
           `}
         >
           <AffectionBar points={affectionPoints} animate={true} />
+        </div>
+      )}
+
+      {/* 프로필 드롭다운 */}
+      {isProfileDropdownOpen && (
+        <div
+          className={`
+            mt-4 w-40 bg-black/50 backdrop-blur-lg border border-white/20 rounded-lg overflow-hidden ml-auto
+            ${
+              isProfileDropdownOpen
+                ? "opacity-100 scale-100 translate-y-0"
+                : "opacity-0 scale-95 translate-y-[-10px]"
+            }
+          `}
+        >
+          <div className="py-1">
+            <button
+              onClick={() => {
+                // TODO: 구독 관리 페이지로 이동 또는 모달 열기
+                console.log("구독 관리 클릭");
+              }}
+              className="w-full px-4 py-2 text-left text-white/90 hover:text-white hover:bg-white/10 transition-colors duration-200 text-sm"
+            >
+              Manage Subscription
+            </button>
+            <button
+              onClick={() => {
+                onSignOut?.();
+              }}
+              className="w-full px-4 py-2 text-left text-white/90 hover:text-white hover:bg-white/10 transition-colors duration-200 text-sm"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       )}
     </div>
