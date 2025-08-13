@@ -41,12 +41,12 @@ const DEFAULT_VRM_MODELS = [
     path: "/models/hiyori.vrm",
     preview: "/preview/hiyori.png",
   },
-  {
-    id: "ren",
-    name: "Ren",
-    path: "/models/ren.vrm",
-    preview: "/preview/ren.png",
-  },
+  // {
+  //   id: "ren",
+  //   name: "Ren",
+  //   path: "/models/ren.vrm",
+  //   preview: "/preview/ren.png",
+  // },
 ];
 
 // Default background images available
@@ -59,8 +59,8 @@ const DEFAULT_BACKGROUNDS = [
   { id: "jessica2", name: "Jessica 2", path: "/background/jessica2.png" },
   { id: "hiyori1", name: "Hiyori 1", path: "/background/hiyori.png" },
   { id: "hiyori2", name: "Hiyori 2", path: "/background/hiyori2.png" },
-  { id: "ren1", name: "Ren 1", path: "/background/ren.png" },
-  { id: "ren2", name: "Ren 2", path: "/background/ren2.png" },
+  // { id: "ren1", name: "Ren 1", path: "/background/ren.png" },
+  // { id: "ren2", name: "Ren 2", path: "/background/ren2.png" },
 ];
 
 interface CharacterForm {

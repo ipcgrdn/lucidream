@@ -8,10 +8,10 @@ import PricingModal from "@/components/modal/PricingModal";
 export default function Navbar() {
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   return (
-    <nav className="absolute top-0 left-0 w-full z-20 px-6 py-4">
+    <nav className="fixed top-0 left-0 w-full z-20 px-6 py-4">
       <div className="flex items-center justify-between max-w-8xl mx-auto">
         {/* Left side - Logo + Brand */}
-        <div className="flex items-center">
+        <Link href="/" className="flex items-center">
           <Image
             src="/logo.png"
             alt="Lucidream Logo"
@@ -22,10 +22,16 @@ export default function Navbar() {
           <span className="text-white text-xl font-medium tracking-tight font-orbitron">
             lucidream
           </span>
-        </div>
+        </Link>
 
         {/* Right side - Navigation */}
         <div className="flex items-center space-x-6 text-sm">
+          <Link
+            href="/service"
+            className="text-white/80 hover:text-white transition-colors duration-200 font-orbitron font-medium hidden md:block"
+          >
+            Service
+          </Link>
           <button
             onClick={() => setIsPricingModalOpen(true)}
             className="text-white/80 hover:text-white transition-colors duration-200 font-orbitron font-medium hidden md:block"
@@ -49,9 +55,9 @@ export default function Navbar() {
           </Link>
         </div>
       </div>
-      
+
       {/* Pricing Modal */}
-      <PricingModal 
+      <PricingModal
         isOpen={isPricingModalOpen}
         onClose={() => setIsPricingModalOpen(false)}
       />
