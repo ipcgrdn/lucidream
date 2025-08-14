@@ -720,7 +720,7 @@ export default function CreateCharacterModal({
         {/* Progress Bar */}
         <div className="w-full bg-white/10 rounded-full h-1 mb-6">
           <div
-            className="bg-gradient-to-r from-blue-400 to-purple-500 h-1 rounded-full transition-all duration-300"
+            className="bg-gradient-to-r from-gray-500 to-white h-1 rounded-full transition-all duration-300"
             style={{ width: `${(currentStep / totalSteps) * 100}%` }}
           />
         </div>

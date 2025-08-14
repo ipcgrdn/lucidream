@@ -134,12 +134,12 @@ export default function ChatMessages({
           stop();
         }
 
-        // 짧은 딜레이 후 자동 재생
+        // 짧은 딜레이 후 자동 재생 (애니메이션과 동기화를 위해 딜레이 단축)
         const timer = setTimeout(() => {
           speak(lastCompletedMessage, {
             model_id: "eleven_multilingual_v2",
           });
-        }, 500);
+        }, 100);
 
         return () => clearTimeout(timer);
       }

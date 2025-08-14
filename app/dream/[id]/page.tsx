@@ -292,6 +292,7 @@ export default function DreamChatPage() {
       const decoder = new TextDecoder();
       let assistantMessageContent = "";
       let hasTriggeredAnimation = false;
+      let detectedAnimationPreset: AnimationPresetType | null = null;
       let detectedAffectionChange = 0;
 
       // 어시스턴트 메시지를 미리 추가하고 스트리밍으로 업데이트
@@ -327,10 +328,17 @@ export default function DreamChatPage() {
                         animationDetection.hasAnimation &&
                         animationDetection.animationPreset
                       ) {
-                        handleAnimationChange(
-                          animationDetection.animationPreset
-                        );
+                        detectedAnimationPreset =
+                          animationDetection.animationPreset;
                         hasTriggeredAnimation = true;
+
+                        // TTS가 꺼져있으면 즉시 애니메이션 실행
+                        if (!autoTTS) {
+                          handleAnimationChange(
+                            animationDetection.animationPreset
+                          );
+                        }
+                        // TTS가 켜져있으면 나중에 음성과 함께 실행하도록 저장만 함
                       }
                     }
 
@@ -428,6 +436,13 @@ export default function DreamChatPage() {
                     // 자동 TTS를 위해 완료된 메시지 설정
                     if (autoTTS) {
                       setLastCompletedMessage(finalCleanContent);
+
+                      // TTS와 함께 애니메이션 실행 (같은 딜레이 적용)
+                      if (detectedAnimationPreset) {
+                        setTimeout(() => {
+                          handleAnimationChange(detectedAnimationPreset!);
+                        }, 300);
+                      }
                     }
                     break;
                   }
