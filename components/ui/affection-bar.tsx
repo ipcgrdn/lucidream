@@ -54,7 +54,7 @@ export default function AffectionBar({
   const progress = AffectionSystem.getProgressToNextLevel(displayPoints);
 
   return (
-    <div className="bg-white/10 rounded-3xl p-5 border border-white/20 shadow-lg backdrop-blur-sm">
+    <div className="bg-white/10 rounded-3xl p-5 border border-white/20 shadow-lg backdrop-blur-sm mx-4 md:mx-0">
       {/* Header with sparkles */}
       <div className="flex items-center justify-center mb-4">
         <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full border border-white/20">

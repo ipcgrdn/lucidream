@@ -39,9 +39,9 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative z-10 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-hidden"
+            className="relative z-10 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto"
           >
-            <div className="bg-black/80 backdrop-blur-xl border border-white/20 rounded-3xl p-8">
+            <div className="bg-black/80 backdrop-blur-xl border border-white/20 rounded-3xl p-4 md:p-8">
               {/* Header */}
               <div className="text-center mb-8">
                 <button
