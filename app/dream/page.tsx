@@ -130,7 +130,7 @@ export default function Dream() {
               Recent
             </button>
             <Link
-              href="https://discord.gg/lucidream"
+              href="https://discord.gg/C3cMaZnn"
               target="_blank"
               className="text-white/80 hover:text-white transition-colors duration-200"
             >
