@@ -12,7 +12,7 @@ interface TTSRequest {
   };
 }
 
-// 기본 음성 설정
+// 기본 음성 설정 (영어/기타 언어용)
 const DEFAULT_VOICE_SETTINGS = {
   stability: 0.5,
   similarity_boost: 0.75,
@@ -20,8 +20,24 @@ const DEFAULT_VOICE_SETTINGS = {
   use_speaker_boost: true,
 };
 
-// 기본 음성 ID (fallback용)
-const DEFAULT_VOICE_ID = "kdmDKE6EkgrWrrykO9Qt";
+// 한국어 최적화 음성 설정
+const KOREAN_VOICE_SETTINGS = {
+  stability: 0.75, // 더 안정적인 발음
+  similarity_boost: 0.85, // 음성 특성 강화
+  style: 0.5, // 자연스러운 억양 유지
+  use_speaker_boost: true,
+};
+
+// 음성 ID 설정
+const DEFAULT_VOICE_ID = "kdmDKE6EkgrWrrykO9Qt"; // 영어/기타 언어용 기본 음성
+const KOREAN_VOICE_ID = "uyVNoMrnUku1dZyVEXwD"; // 한국어 최고 모델
+
+// 한국어 텍스트 감지 함수
+function detectKorean(text: string): boolean {
+  // 한글 문자가 포함되어 있는지 확인
+  const koreanRegex = /[가-힣]/;
+  return koreanRegex.test(text);
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -53,9 +69,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 전달된 voice_id 사용, 없으면 기본 음성 사용
-    const finalVoiceId = voice_id || DEFAULT_VOICE_ID;
-    const finalVoiceSettings = { ...DEFAULT_VOICE_SETTINGS, ...voice_settings };
+    // 한국어 감지
+    const isKorean = detectKorean(cleanText);
+
+    // 언어에 따른 음성 ID 및 설정 선택
+    let finalVoiceId: string;
+    let finalVoiceSettings: typeof DEFAULT_VOICE_SETTINGS;
+
+    if (voice_id) {
+      // 사용자가 특정 음성을 지정한 경우 우선 사용
+      finalVoiceId = voice_id;
+      finalVoiceSettings = isKorean
+        ? { ...KOREAN_VOICE_SETTINGS, ...voice_settings }
+        : { ...DEFAULT_VOICE_SETTINGS, ...voice_settings };
+    } else {
+      // 언어에 따른 자동 선택
+      finalVoiceId = isKorean ? KOREAN_VOICE_ID : DEFAULT_VOICE_ID;
+      finalVoiceSettings = isKorean
+        ? { ...KOREAN_VOICE_SETTINGS, ...voice_settings }
+        : { ...DEFAULT_VOICE_SETTINGS, ...voice_settings };
+    }
 
     // ElevenLabs API 호출
     const response = await fetch(

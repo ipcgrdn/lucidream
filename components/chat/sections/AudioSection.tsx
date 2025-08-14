@@ -321,7 +321,7 @@ export default function AudioSection({
                     </span>
                   </div>
                   <div className="text-xs text-white/60 mt-1 line-clamp-2">
-                    System default voice
+                    Automatically switch based on language
                   </div>
                 </div>
               </div>
