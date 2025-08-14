@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { BackgroundGradient } from "@/components/ui/background-gradient";
+import { useAuth } from "@/contexts/Authcontext";
 
 interface PricingModalProps {
   isOpen: boolean;
@@ -11,10 +12,35 @@ interface PricingModalProps {
 
 export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
   const [isAnnual, setIsAnnual] = useState(false);
+  const { user } = useAuth();
 
   const handleStartPremium = () => {
-    // 임시로 비활성화 - 새로운 결제 시스템 준비 중
-    alert("새로운 결제 시스템을 준비 중입니다. 곧 이용하실 수 있습니다!");
+    // 월간/연간에 따른 상품 ID 선택
+    const productId = isAnnual
+      ? process.env.NEXT_PUBLIC_DODO_PAYMENTS_ANNUAL_PRODUCT_ID
+      : process.env.NEXT_PUBLIC_DODO_PAYMENTS_MONTHLY_PRODUCT_ID;
+
+    // Static Payment Link 생성
+    const baseUrl = "https://test.checkout.dodopayments.com/buy";
+    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dream`;
+
+    // URL 파라미터 생성
+    const params = new URLSearchParams({
+      quantity: "1",
+      redirect_url: redirectUrl,
+    });
+
+    // 사용자 ID를 metadata로 추가
+    if (user?.id) {
+      params.append("metadata_userId", user.id);
+      params.append("metadata_planType", isAnnual ? "annual" : "monthly");
+      params.append("metadata_createdAt", new Date().toISOString());
+    }
+
+    const paymentUrl = `${baseUrl}/${productId}?${params.toString()}`;
+
+    // 결제 페이지로 리다이렉트
+    window.location.href = paymentUrl;
   };
 
   if (!isOpen) return null;
