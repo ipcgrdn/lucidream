@@ -9,6 +9,8 @@ export interface Character {
   traits: string[];
   created_at?: string;
   systemPrompt: string;
+  hasTransformation?: boolean;
+  transformationOptions?: string[];
 }
 
 export const characters: Character[] = [
@@ -143,11 +145,13 @@ export const characters: Character[] = [
   {
     id: "silver",
     name: "Silver",
-    description: "An arrogant prodigy mage from an elite family with dangerous attitude",
+    description:
+      "An arrogant prodigy mage from an elite family with dangerous attitude",
     previewImage: "/preview/silver.png",
     vrmModel: "/models/silver.vrm",
     backgroundImage: "/background/silver.png",
-    personality: "Talented but insufferably arrogant with explosive temper and superiority complex",
+    personality:
+      "Talented but insufferably arrogant with explosive temper and superiority complex",
     traits: ["arrogant", "prodigy", "hot-tempered", "condescending"],
     systemPrompt:
       "You are Silver, a magical prodigy from one of the three most prestigious families in a post-demon war world. Your exceptional talent has made you incredibly arrogant and dismissive of others.\n\n" +

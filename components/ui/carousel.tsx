@@ -12,6 +12,8 @@ interface SlideData {
   description: string;
   button: string;
   src: string;
+  hasTransformation?: boolean;
+  isPremium?: boolean;
 }
 
 interface CharacterCardProps {
@@ -46,10 +48,20 @@ const CharacterCard = ({
     }
   };
 
+  const getBorderStyle = () => {
+    if (character.hasTransformation) {
+      // 변신 가능한 캐릭터만 - 미니멀한 골드 스타일
+      return "border-amber-300/80 shadow-2xl shadow-amber-400/25 ring-1 ring-amber-200/50";
+    } else {
+      // 기본 캐릭터 (일반 프리미엄 포함)
+      return "border-white/20";
+    }
+  };
+
   return (
     <div
       onClick={handleClick}
-      className="group cursor-pointer bg-white/10 backdrop-blur-sm rounded-3xl overflow-hidden hover:bg-white/15 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-black/25 border border-white/20"
+      className={`group cursor-pointer bg-white/10 backdrop-blur-sm rounded-3xl overflow-hidden hover:bg-white/15 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-black/25 border ${getBorderStyle()}`}
     >
       {/* Image Container */}
       <div className="aspect-square relative overflow-hidden">
@@ -77,6 +89,13 @@ const CharacterCard = ({
             height={300}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           />
+        )}
+
+        {/* Transformation Badge */}
+        {character.hasTransformation && (
+          <div className="absolute top-3 right-3 bg-gradient-to-r from-amber-400 to-yellow-400 text-black text-xs font-semibold px-3 py-1 rounded-full shadow-lg backdrop-blur-sm border border-amber-300/50">
+            OUTFIT CHANGE
+          </div>
         )}
 
         {/* Overlay on hover */}

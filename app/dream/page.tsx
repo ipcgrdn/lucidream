@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/Authcontext";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { getAllCharacters } from "@/lib/characters";
+import { getAllPremiumCharacters } from "@/lib/premium_characters";
 import {
   getUserCustomCharacters,
   CustomCharacter,
@@ -15,8 +16,19 @@ import Link from "next/link";
 import Image from "next/image";
 
 const characters = getAllCharacters();
+const premiumChars = getAllPremiumCharacters();
 
-const characterData = [
+interface CharacterData {
+  id: string;
+  title: string;
+  description: string;
+  button: string;
+  src: string;
+  hasTransformation?: boolean;
+  isPremium?: boolean;
+}
+
+const characterData: CharacterData[] = [
   ...characters.map((char) => ({
     id: char.id,
     title: char.name,
@@ -27,7 +39,7 @@ const characterData = [
 ];
 
 // Custom models data with create button as first item
-const baseCustomCharacterData = [
+const baseCustomCharacterData: CharacterData[] = [
   {
     id: "create-new",
     title: "Custom Character",
@@ -36,6 +48,19 @@ const baseCustomCharacterData = [
     button: "Create New",
     src: "create",
   },
+];
+
+// Premium characters data
+const premiumCharacterData: CharacterData[] = [
+  ...premiumChars.map((char) => ({
+    id: char.id,
+    title: char.name,
+    description: char.description,
+    button: `Meet ${char.name}`,
+    src: char.previewImage,
+    hasTransformation: char.hasTransformation,
+    isPremium: true,
+  })),
 ];
 
 export default function Dream() {
@@ -87,7 +112,7 @@ export default function Dream() {
   }, [isProfileDropdownOpen]);
 
   // Combine base custom character data with user's custom characters
-  const customCharacterData = [
+  const customCharacterData: CharacterData[] = [
     ...baseCustomCharacterData,
     ...customCharacters.map((char) => ({
       id: char.id,
@@ -209,8 +234,18 @@ export default function Dream() {
         </div>
 
         {/* Custom Models Section */}
-        <section>
+        <section className="mb-20">
           <Carousel slides={customCharacterData} userId={user?.id || ""} />
+        </section>
+
+        {/* Section Divider */}
+        <div className="flex items-center justify-center mb-20">
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+        </div>
+
+        {/* Premium Models Section */}
+        <section>
+          <Carousel slides={premiumCharacterData} userId={user?.id || ""} />
         </section>
       </main>
 

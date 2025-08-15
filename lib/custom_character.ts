@@ -1,6 +1,10 @@
 import { supabase } from "./supabase";
 import { getUserBackgrounds } from "./dream_backgrounds";
 import { getCharacterById, Character } from "./characters";
+import {
+  getPremiumCharacterById,
+  PremiumCharacter,
+} from "./premium_characters";
 
 // Custom Character Database Interface
 export interface CustomCharacter {
@@ -436,7 +440,28 @@ export function convertCustomCharacterToCharacter(
 }
 
 /**
- * 통합 캐릭터 조회 함수 - 기본 캐릭터와 커스텀 캐릭터를 모두 검색
+ * PremiumCharacter를 Character 인터페이스 형태로 변환하는 헬퍼 함수
+ */
+export function convertPremiumCharacterToCharacter(
+  premiumChar: PremiumCharacter
+): Character {
+  return {
+    id: premiumChar.id,
+    name: premiumChar.name,
+    description: premiumChar.description,
+    previewImage: premiumChar.previewImage,
+    vrmModel: premiumChar.vrmModel,
+    backgroundImage: premiumChar.backgroundImage,
+    personality: premiumChar.personality,
+    traits: premiumChar.traits,
+    systemPrompt: premiumChar.systemPrompt,
+    hasTransformation: premiumChar.hasTransformation,
+    transformationOptions: premiumChar.transformationOptions,
+  };
+}
+
+/**
+ * 통합 캐릭터 조회 함수 - 기본 캐릭터, 프리미엄 캐릭터, 커스텀 캐릭터를 모두 검색
  */
 export async function getCharacterByIdUnified(
   characterId: string,
@@ -449,7 +474,13 @@ export async function getCharacterByIdUnified(
       return defaultCharacter;
     }
 
-    // 기본 캐릭터에 없고 userId가 있으면 커스텀 캐릭터에서 찾기
+    // 프리미엄 캐릭터에서 찾기
+    const premiumCharacter = getPremiumCharacterById(characterId);
+    if (premiumCharacter) {
+      return convertPremiumCharacterToCharacter(premiumCharacter);
+    }
+
+    // 기본 캐릭터와 프리미엄 캐릭터에 없고 userId가 있으면 커스텀 캐릭터에서 찾기
     if (userId) {
       const customCharacter = await getCustomCharacterById(characterId, userId);
       if (customCharacter) {

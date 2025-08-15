@@ -10,6 +10,7 @@ interface ChatBackgroundProps {
   onAnimationChange?: (preset: AnimationPresetType) => void;
   audioElement?: HTMLAudioElement | null;
   enableLipSync?: boolean;
+  modelPath?: string;
 }
 
 export default function ChatBackground({
@@ -19,11 +20,12 @@ export default function ChatBackground({
   onAnimationChange,
   audioElement,
   enableLipSync = false,
+  modelPath,
 }: ChatBackgroundProps) {
   return (
     <div className="absolute inset-0 w-full h-full">
       <VRMViewer
-        modelPath={character.vrmModel}
+        modelPath={modelPath || character.vrmModel}
         className="relative z-10"
         backgroundImage={character.backgroundImage}
         animationPreset={animationPreset}

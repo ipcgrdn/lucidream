@@ -8,10 +8,16 @@ import CharacterSection from "./sections/CharacterSection";
 import AudioSection from "./sections/AudioSection";
 import DreamSection from "./sections/DreamSection";
 import AnimationSection from "./sections/AnimationSection";
-import { Flower, Headphones, UserRound, PlayCircle } from "lucide-react";
+import TransformationSection from "./sections/TransformationSection";
+import { Flower, Headphones, UserRound, PlayCircle, Shirt } from "lucide-react";
 import { AnimationPresetType } from "@/lib/vrm-animations";
 
-export type LeftCardSection = "character" | "audio" | "dream" | "animation";
+export type LeftCardSection =
+  | "character"
+  | "audio"
+  | "dream"
+  | "animation"
+  | "transformation";
 
 interface LeftCardProps {
   isOpen: boolean;
@@ -22,6 +28,7 @@ interface LeftCardProps {
   onAnimationPlay?: (presetType: AnimationPresetType) => void;
   minimalMode?: boolean;
   onMinimalModeToggle?: () => void;
+  onTransformationChange?: (modelPath: string) => void;
 }
 
 export default function LeftCard({
@@ -33,6 +40,7 @@ export default function LeftCard({
   onAnimationPlay,
   minimalMode,
   onMinimalModeToggle,
+  onTransformationChange,
 }: LeftCardProps) {
   const [activeSection, setActiveSection] = useState<LeftCardSection>(() => {
     if (typeof window !== "undefined") {
@@ -123,14 +131,31 @@ export default function LeftCard({
             >
               <Flower className="w-5 h-5" />
             </button>
+
+            {/* Transformation 섹션 - hasTransformation이 true인 경우에만 표시 */}
+            {character?.hasTransformation && (
+              <button
+                onClick={() => handleSectionChange("transformation")}
+                className={`
+                  p-3 rounded-xl transition-all duration-300 
+                  ${
+                    activeSection === "transformation"
+                      ? "bg-white/20 text-white shadow-lg"
+                      : "text-white/60 hover:text-white/80 hover:bg-white/10"
+                  }
+                `}
+              >
+                <Shirt className="w-5 h-5" />
+              </button>
+            )}
           </div>
         </div>
 
         {/* 섹션 내용 */}
         <div className="flex-1 overflow-hidden">
           {activeSection === "character" && (
-            <CharacterSection 
-              character={character} 
+            <CharacterSection
+              character={character}
               minimalMode={minimalMode}
               onMinimalModeToggle={onMinimalModeToggle}
             />
@@ -151,6 +176,14 @@ export default function LeftCard({
           {activeSection === "animation" && (
             <AnimationSection onAnimationPlay={onAnimationPlay} />
           )}
+
+          {activeSection === "transformation" &&
+            character?.hasTransformation && (
+              <TransformationSection
+                character={character}
+                onTransformationChange={onTransformationChange}
+              />
+            )}
         </div>
       </div>
     </div>

@@ -56,22 +56,30 @@ export default function VRMModel({
         obj.frustumCulled = false;
       });
 
-      // 새로운 VRMA 기반 애니메이션 매니저 초기화
-      if (!animationManagerRef.current) {
-        animationManagerRef.current = new VRMAAnimationManager(vrm);
-        // 초기 idle 애니메이션 시작 (비동기)
-        animationManagerRef.current.playAnimation("idle", 0.5);
+      // 기존 애니메이션 매니저와 타이머 정리
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+        animationTimeoutRef.current = null;
       }
 
-      // 립싱크 매니저 초기화
-      if (enableLipSync && !lipSyncManagerRef.current) {
+      // 새로운 VRM에 대한 새로운 애니메이션 매니저 생성
+      animationManagerRef.current = new VRMAAnimationManager(vrm);
+      currentAnimationRef.current = "idle";
+      // 초기 idle 애니메이션 시작 (비동기)
+      animationManagerRef.current.playAnimation("idle", 0.5);
+
+      // 립싱크 매니저 초기화 (기존 매니저 정리 후 새로 생성)
+      if (enableLipSync) {
+        if (lipSyncManagerRef.current) {
+          lipSyncManagerRef.current.stopLipSync();
+        }
         lipSyncManagerRef.current = new LipSyncManager(vrm);
       }
 
       // 로딩 완료 콜백 호출
       onLoaded?.();
     }
-  }, [gltf, onLoaded]);
+  }, [gltf, onLoaded, enableLipSync]);
 
   // 애니메이션 프리셋 변경 감지
   useEffect(() => {
@@ -163,6 +171,21 @@ export default function VRMModel({
       if (animationManagerRef.current) {
         animationManagerRef.current.dispose();
       }
+      if (lipSyncManagerRef.current) {
+        lipSyncManagerRef.current.stopLipSync();
+      }
+    };
+  }, []);
+
+  // 컴포넌트 cleanup
+  useEffect(() => {
+    return () => {
+      // 애니메이션 타이머 정리
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+      
+      // 립싱크 정리
       if (lipSyncManagerRef.current) {
         lipSyncManagerRef.current.stopLipSync();
       }

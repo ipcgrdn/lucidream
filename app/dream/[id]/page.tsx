@@ -59,6 +59,9 @@ export default function DreamChatPage() {
   const [currentAnimation, setCurrentAnimation] =
     useState<AnimationPresetType>("idle");
 
+  // VRM 모델 경로 상태 관리
+  const [currentModelPath, setCurrentModelPath] = useState<string>("");
+
   // 채팅 관련 상태
   interface Message {
     role: "user" | "assistant";
@@ -122,6 +125,11 @@ export default function DreamChatPage() {
     setCurrentAffectionChange(0);
   }, []);
 
+  // Transformation 변경 핸들러
+  const handleTransformationChange = useCallback((modelPath: string) => {
+    setCurrentModelPath(modelPath);
+  }, []);
+
   useEffect(() => {
     if (!loading && !user) {
       router.push("/auth");
@@ -182,6 +190,7 @@ export default function DreamChatPage() {
 
         setDream(dreamData);
         setCharacter(characterData);
+        setCurrentModelPath(characterData.vrmModel);
         setCurrentAffectionPoints(dreamData.affection_points);
       } catch (error) {
         console.error("Dream 데이터 로딩 에러:", error);
@@ -531,6 +540,7 @@ export default function DreamChatPage() {
           onAnimationChange={handleAnimationChange}
           audioElement={currentAudioElement}
           enableLipSync={true}
+          modelPath={currentModelPath}
         />
       )}
 
@@ -551,6 +561,7 @@ export default function DreamChatPage() {
           setMinimalMode(newMinimalMode);
           localStorage.setItem("minimalMode", JSON.stringify(newMinimalMode));
         }}
+        onTransformationChange={handleTransformationChange}
       />
 
       <RightCard

@@ -19,7 +19,7 @@ function CameraZoomIn({ isLoaded }: { isLoaded: boolean }) {
     // 초기 카메라 위치 (멀리)
     const startPosition = new THREE.Vector3(0, 0.1, -10);
     // 최종 카메라 위치 (가까이)
-    const endPosition = new THREE.Vector3(0, 0.1, -1);
+    const endPosition = new THREE.Vector3(0, 0.1, -3);
 
     // 카메라를 초기 위치로 설정
     camera.position.copy(startPosition);
@@ -88,6 +88,11 @@ export default function VRMViewer({
   const [backgroundBlur, setBackgroundBlur] = useState(0);
   const [currentBackgroundImage, setCurrentBackgroundImage] =
     useState(backgroundImage);
+
+  // modelPath가 변경될 때마다 isLoaded 상태 리셋
+  useEffect(() => {
+    setIsLoaded(false);
+  }, [modelPath]);
 
   // 배경 설정 로드 및 이벤트 리스너
   useEffect(() => {
