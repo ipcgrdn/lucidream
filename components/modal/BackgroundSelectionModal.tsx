@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { Character, getAllCharacters } from "@/lib/characters";
+import { getAllPremiumCharacters } from "@/lib/premium_characters";
 import {
   getUserBackgrounds,
   uploadBackgroundImage,
@@ -20,18 +21,37 @@ interface BackgroundOption {
 
 // 캐릭터별 배경 옵션 생성 함수
 const getCharacterBackgrounds = (character: Character): BackgroundOption[] => {
-  // 기본 캐릭터들의 ID 목록 가져오기
+  // 기본 캐릭터들과 프리미엄 캐릭터들의 ID 목록 가져오기
   const defaultCharacters = getAllCharacters();
+  const premiumCharacters = getAllPremiumCharacters();
+  
   const isDefaultCharacter = defaultCharacters.some(
     (c) => c.id === character.id
   );
+  const isPremiumCharacter = premiumCharacters.some(
+    (c) => c.id === character.id
+  );
 
-  if (!isDefaultCharacter) {
+  if (!isDefaultCharacter && !isPremiumCharacter) {
     // 커스텀 캐릭터의 경우 실제 배경 이미지 URL 사용
     return [
       {
         id: `${character.id}_custom`,
         path: character.backgroundImage,
+        type: "character",
+      },
+    ];
+  } else if (isPremiumCharacter) {
+    // 프리미엄 캐릭터의 경우 premium 폴더 사용
+    return [
+      {
+        id: `${character.id}_1`,
+        path: `/premium/background/${character.id}.png`,
+        type: "character",
+      },
+      {
+        id: `${character.id}_2`,
+        path: `/premium/background/${character.id}2.png`,
         type: "character",
       },
     ];
