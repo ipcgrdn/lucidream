@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Character } from "@/lib/characters";
 import { Dream } from "@/lib/dreams";
+import { UserPlanInfo } from "@/lib/plan";
 
 import CharacterSection from "./sections/CharacterSection";
 import AudioSection from "./sections/AudioSection";
@@ -29,6 +30,8 @@ interface LeftCardProps {
   minimalMode?: boolean;
   onMinimalModeToggle?: () => void;
   onTransformationChange?: (modelPath: string) => void;
+  userPlan?: UserPlanInfo | null;
+  onUpgradeClick?: () => void;
 }
 
 export default function LeftCard({
@@ -41,6 +44,8 @@ export default function LeftCard({
   minimalMode,
   onMinimalModeToggle,
   onTransformationChange,
+  userPlan,
+  onUpgradeClick,
 }: LeftCardProps) {
   const [activeSection, setActiveSection] = useState<LeftCardSection>(() => {
     if (typeof window !== "undefined") {
@@ -174,7 +179,11 @@ export default function LeftCard({
           )}
 
           {activeSection === "animation" && (
-            <AnimationSection onAnimationPlay={onAnimationPlay} />
+            <AnimationSection
+              onAnimationPlay={onAnimationPlay}
+              userPlan={userPlan}
+              onUpgradeClick={onUpgradeClick}
+            />
           )}
 
           {activeSection === "transformation" &&

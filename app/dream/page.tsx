@@ -12,6 +12,7 @@ import {
 } from "@/lib/custom_character";
 import RecentModal from "@/components/modal/RecentModal";
 import PricingModal from "@/components/modal/PricingModal";
+import { getUserPlan, UserPlanInfo } from "@/lib/plan";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -73,21 +74,26 @@ export default function Dream() {
   const [customCharacters, setCustomCharacters] = useState<CustomCharacter[]>(
     []
   );
+  const [userPlan, setUserPlan] = useState<UserPlanInfo | null>(null);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Load custom characters when user is authenticated
+  // Load custom characters and user plan when user is authenticated
   useEffect(() => {
-    const loadCustomCharacters = async () => {
+    const loadUserData = async () => {
       if (user?.id) {
-        const characters = await getUserCustomCharacters(user.id);
+        const [characters, planInfo] = await Promise.all([
+          getUserCustomCharacters(user.id),
+          getUserPlan(user.id),
+        ]);
         setCustomCharacters(characters);
+        setUserPlan(planInfo);
       }
     };
 
     if (!loading && !user) {
       router.push("/auth");
     } else if (user?.id) {
-      loadCustomCharacters();
+      loadUserData();
     }
   }, [user, loading, router]);
 
@@ -113,13 +119,14 @@ export default function Dream() {
 
   // Combine base custom character data with user's custom characters
   const customCharacterData: CharacterData[] = [
-    ...baseCustomCharacterData,
+    ...baseCustomCharacterData.map((char) => ({ ...char, isCustom: true })),
     ...customCharacters.map((char) => ({
       id: char.id,
       title: char.name,
       description: char.description,
       button: `Meet ${char.name}`,
       src: char.preview_image_url,
+      isCustom: true,
     })),
   ];
 
@@ -225,7 +232,12 @@ export default function Dream() {
       <main className="min-h-screen pt-28 md:pt-32 pb-20 px-4">
         {/* Default Models Section */}
         <section className="mb-20">
-          <Carousel slides={characterData} userId={user?.id || ""} />
+          <Carousel
+            slides={characterData}
+            userId={user?.id || ""}
+            userPlan={userPlan}
+            onUpgradeClick={() => setIsPricingModalOpen(true)}
+          />
         </section>
 
         {/* Section Divider */}
@@ -235,7 +247,12 @@ export default function Dream() {
 
         {/* Custom Models Section */}
         <section className="mb-20">
-          <Carousel slides={customCharacterData} userId={user?.id || ""} />
+          <Carousel
+            slides={customCharacterData}
+            userId={user?.id || ""}
+            userPlan={userPlan}
+            onUpgradeClick={() => setIsPricingModalOpen(true)}
+          />
         </section>
 
         {/* Section Divider */}
@@ -245,7 +262,12 @@ export default function Dream() {
 
         {/* Premium Models Section */}
         <section>
-          <Carousel slides={premiumCharacterData} userId={user?.id || ""} />
+          <Carousel
+            slides={premiumCharacterData}
+            userId={user?.id || ""}
+            userPlan={userPlan}
+            onUpgradeClick={() => setIsPricingModalOpen(true)}
+          />
         </section>
       </main>
 

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { findOrCreateDream } from "@/lib/dreams";
 import CreateCharacterModal from "@/components/modal/CreateCharacterModal";
+import { UserPlanInfo } from "@/lib/plan";
 
 interface SlideData {
   id: string;
@@ -14,22 +15,37 @@ interface SlideData {
   src: string;
   hasTransformation?: boolean;
   isPremium?: boolean;
+  isCustom?: boolean;
 }
 
 interface CharacterCardProps {
   character: SlideData;
   userId: string;
+  userPlan: UserPlanInfo | null;
   onCreateNew?: () => void;
+  onUpgradeClick?: () => void;
 }
 
 const CharacterCard = ({
   character,
   userId,
+  userPlan,
   onCreateNew,
+  onUpgradeClick,
 }: CharacterCardProps) => {
   const router = useRouter();
 
+  const isLocked = () => {
+    if (!userPlan || userPlan.plan === "premium") return false;
+    return character.isPremium || character.isCustom;
+  };
+
   const handleClick = async () => {
+    if (isLocked()) {
+      onUpgradeClick?.();
+      return;
+    }
+
     if (character.id === "create-new") {
       onCreateNew?.();
     } else {
@@ -61,7 +77,9 @@ const CharacterCard = ({
   return (
     <div
       onClick={handleClick}
-      className={`group cursor-pointer bg-white/10 backdrop-blur-sm rounded-3xl overflow-hidden hover:bg-white/15 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-black/25 border ${getBorderStyle()}`}
+      className={`group cursor-pointer bg-white/10 backdrop-blur-sm rounded-3xl overflow-hidden hover:bg-white/15 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-black/25 border ${getBorderStyle()} ${
+        isLocked() ? "relative" : ""
+      }`}
     >
       {/* Image Container */}
       <div className="aspect-square relative overflow-hidden">
@@ -87,7 +105,9 @@ const CharacterCard = ({
             alt={character.title}
             width={300}
             height={300}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ${
+              isLocked() ? "filter blur-sm opacity-70" : ""
+            }`}
           />
         )}
 
@@ -98,8 +118,33 @@ const CharacterCard = ({
           </div>
         )}
 
+        {/* Lock Overlay */}
+        {isLocked() && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+            <div className="text-center">
+              <svg
+                className="w-12 h-12 text-white/80 mx-auto mb-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
+              </svg>
+            </div>
+          </div>
+        )}
+
         {/* Overlay on hover */}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div
+          className={`absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+            isLocked() ? "hidden" : ""
+          }`}
+        />
       </div>
 
       {/* Content */}
@@ -122,9 +167,16 @@ const CharacterCard = ({
 interface CarouselProps {
   slides: SlideData[];
   userId: string;
+  userPlan: UserPlanInfo | null;
+  onUpgradeClick?: () => void;
 }
 
-export function Carousel({ slides, userId }: CarouselProps) {
+export function Carousel({
+  slides,
+  userId,
+  userPlan,
+  onUpgradeClick,
+}: CarouselProps) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const handleCreateNew = () => {
@@ -140,7 +192,9 @@ export function Carousel({ slides, userId }: CarouselProps) {
               key={slide.id}
               character={slide}
               userId={userId}
+              userPlan={userPlan}
               onCreateNew={handleCreateNew}
+              onUpgradeClick={onUpgradeClick}
             />
           ))}
         </div>

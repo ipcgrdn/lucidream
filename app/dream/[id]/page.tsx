@@ -8,6 +8,12 @@ import { getDreamById, Dream } from "@/lib/dreams";
 import { Character } from "@/lib/characters";
 import { getCharacterByIdUnified } from "@/lib/custom_character";
 import { AnimationPresetType } from "@/lib/vrm-animations";
+import {
+  getUserPlan,
+  UserPlanInfo,
+  canUserSendMessage,
+  incrementUserCredit,
+} from "@/lib/plan";
 
 import ChatNavbar from "@/components/chat/ChatNavbar";
 import ChatBackground from "@/components/chat/ChatBackground";
@@ -21,6 +27,7 @@ import { detectAffectionInStream } from "@/lib/affection-parser";
 import { AffectionSystem, AffectionLevel } from "@/lib/affection";
 import LevelUpCelebration from "@/components/ui/level-up-celebration";
 import AffectionEffect from "@/components/ui/affection-effect";
+import PricingModal from "@/components/modal/PricingModal";
 
 export default function DreamChatPage() {
   const { user, loading, signOut } = useAuth();
@@ -54,6 +61,8 @@ export default function DreamChatPage() {
   const [dream, setDream] = useState<Dream | null>(null);
   const [character, setCharacter] = useState<Character | null>(null);
   const [dreamLoading, setDreamLoading] = useState(true);
+  const [userPlan, setUserPlan] = useState<UserPlanInfo | null>(null);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
 
   // 애니메이션 상태 관리
   const [currentAnimation, setCurrentAnimation] =
@@ -192,6 +201,12 @@ export default function DreamChatPage() {
         setCharacter(characterData);
         setCurrentModelPath(characterData.vrmModel);
         setCurrentAffectionPoints(dreamData.affection_points);
+
+        // 사용자 플랜 정보 로드
+        if (user?.id) {
+          const planInfo = await getUserPlan(user.id);
+          setUserPlan(planInfo);
+        }
       } catch (error) {
         console.error("Dream 데이터 로딩 에러:", error);
         router.push("/dream");
@@ -258,7 +273,15 @@ export default function DreamChatPage() {
   };
 
   const sendMessage = async () => {
-    if (!inputValue.trim() || isLoading || !dreamId || !character) return;
+    if (!inputValue.trim() || isLoading || !dreamId || !character || !user?.id)
+      return;
+
+    // Credit 제한 확인
+    const creditCheck = await canUserSendMessage(user.id);
+    if (!creditCheck.canSend) {
+      setIsPricingModalOpen(true);
+      return;
+    }
 
     // 새 메시지 전송 시 이전 TTS 완료 상태 초기화
     setLastCompletedMessage("");
@@ -273,6 +296,9 @@ export default function DreamChatPage() {
     try {
       // 사용자 메시지를 데이터베이스에 저장
       await saveChatMessage(dreamId, userMessageContent, "user");
+
+      // Credit 증가
+      await incrementUserCredit(user.id);
 
       // OpenAI API 호출 - 최근 10개 메시지만 전송
       const recentMessages = newMessages.slice(-10);
@@ -562,6 +588,8 @@ export default function DreamChatPage() {
           localStorage.setItem("minimalMode", JSON.stringify(newMinimalMode));
         }}
         onTransformationChange={handleTransformationChange}
+        userPlan={userPlan}
+        onUpgradeClick={() => setIsPricingModalOpen(true)}
       />
 
       <RightCard
@@ -609,6 +637,12 @@ export default function DreamChatPage() {
         isVisible={isAffectionEffectVisible}
         affectionChange={currentAffectionChange}
         onComplete={handleAffectionEffectComplete}
+      />
+
+      {/* Pricing Modal */}
+      <PricingModal
+        isOpen={isPricingModalOpen}
+        onClose={() => setIsPricingModalOpen(false)}
       />
     </div>
   );
